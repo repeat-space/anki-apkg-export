@@ -1,5 +1,5 @@
 import { saveAs } from 'filesaverjs';
-import AnkiExport from '../../dist/index';
+import AnkiExport from 'anki-apkg-export';
 
 const apkg = new AnkiExport('deck-name');
 

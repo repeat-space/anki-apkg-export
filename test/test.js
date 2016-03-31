@@ -1,6 +1,7 @@
 import test from 'ava';
+import 'babel-core/register';
 
-import AnkiExport from '../dist/index';
+import AnkiExport from '../src/index';
 import fs from 'fs';
 
 const dest = '/tmp/result.apkg';
