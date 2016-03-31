@@ -3,7 +3,11 @@
   "description": "",
   "version": "0.0.0",
   "main": "dist/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "jszip": "^2.6.0",
+    "sha1": "^1.1.1",
+    "sql.js": "^0.3.2"
+  },
   "devDependencies": {
     "ava": "^0.13.0",
     "babel-cli": "~6.6.0",
