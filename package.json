@@ -1,7 +1,7 @@
 {
   "name": "anki-apkg-export",
   "description": "",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "main": "dist/index.js",
   "dependencies": {
     "jszip": "^2.6.0",
