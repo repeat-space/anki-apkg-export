@@ -78,6 +78,18 @@ export default function(deckName) {
   update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   // console.log(getFirstVal('select models from col'));
 
+  const media = [];
+
+  function addMedia(filename, data) {
+    if (typeof filename !== 'string')
+      throw new TypeError("filename must be a string");
+
+    if (!(data instanceof Buffer))
+      throw new TypeError("data must be a Buffer instance");
+
+    media.push({filename, data})
+  }
+
   function addCard(front, back) {
     const deck_id = top_deck_id
     const note_id = rand();
@@ -121,9 +133,19 @@ export default function(deckName) {
   function save() {
     const binaryArray = db.export();
     const zip = new Zip();
+    const mediaObj = media.reduce((prev, curr, idx) => {
+      prev[idx] = curr.filename;
+      return prev;
+    }, {});
 
     zip.file('collection.anki2', new Buffer(binaryArray));
-    zip.file('media', '{}');
+    zip.file('media', JSON.stringify(mediaObj));
+
+    if(media.length > 0) {
+      for (let i = 0; i < media.length; i++) {
+        zip.file(i, media[i].data);
+      }
+    }
 
     if (process.env.APP_ENV === 'browser') {
       return zip.generate({ type: 'blob' });
@@ -133,6 +155,7 @@ export default function(deckName) {
   };
 
   return {
+    addMedia,
     addCard,
     save
   };
