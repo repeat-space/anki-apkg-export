@@ -141,11 +141,7 @@ export default function(deckName) {
     zip.file('collection.anki2', new Buffer(binaryArray));
     zip.file('media', JSON.stringify(mediaObj));
 
-    if(media.length > 0) {
-      for (let i = 0; i < media.length; i++) {
-        zip.file(i, media[i].data);
-      }
-    }
+    media.forEach((item, i) => zip.file(i, item.data));
 
     if (process.env.APP_ENV === 'browser') {
       return zip.generate({ type: 'blob' });
