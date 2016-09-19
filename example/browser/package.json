@@ -10,6 +10,7 @@
     "filesaverjs": "^0.2.1"
   },
   "devDependencies": {
+    "buffer-loader": "0.0.1",
     "raw-loader": "^0.5.1",
     "script-loader": "^0.6.1",
     "webpack": "^1.12.14"
