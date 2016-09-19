@@ -1,6 +1,6 @@
 {
   "name": "anki-apkg-export",
-  "description": "",
+  "description": "Generate decks for Anki (spaced repetition software)",
   "version": "1.0.1",
   "main": "dist/index.js",
   "dependencies": {
@@ -18,7 +18,7 @@
   },
   "author": "ewnd9 <ewndnine@gmail.com>",
   "keywords": [
-    ""
+    "anki", "spaced repetition software", "webpack"
   ],
   "license": "MIT",
   "preferGlobal": "true",
