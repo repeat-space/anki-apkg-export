@@ -81,12 +81,6 @@ export default function(deckName) {
   const media = [];
 
   function addMedia(filename, data) {
-    if (typeof filename !== 'string')
-      throw new TypeError("filename must be a string");
-
-    if (!(data instanceof Buffer))
-      throw new TypeError("data must be a Buffer instance");
-
     media.push({filename, data})
   }
 
@@ -130,7 +124,7 @@ export default function(deckName) {
     });
   };
 
-  function save() {
+  function save(options = {}) {
     const binaryArray = db.export();
     const zip = new Zip();
     const mediaObj = media.reduce((prev, curr, idx) => {
@@ -144,9 +138,9 @@ export default function(deckName) {
     media.forEach((item, i) => zip.file(i, item.data));
 
     if (process.env.APP_ENV === 'browser') {
-      return zip.generate({ type: 'blob' });
+      return zip.generateAsync(Object.assign({}, { type: 'blob' }, options));
     } else {
-      return zip.generate({ base64:false, compression:'DEFLATE' });
+      return zip.generateAsync(Object.assign({}, { type: 'nodebuffer', base64: false, compression: 'DEFLATE' }, options));
     }
   };
 
