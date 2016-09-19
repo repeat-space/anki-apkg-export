@@ -7,7 +7,7 @@ import fs from 'fs';
 const dest = '/tmp/result.apkg';
 const sample = __dirname + '/fixtures/output.apkg';
 
-test('equals to sample', t => {
+test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name');
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
@@ -16,10 +16,10 @@ test('equals to sample', t => {
   apkg.addCard('card #2 front', 'card #2 back');
   apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
-  const zip = apkg.save();
+  const zip = await apkg.save();
   fs.writeFileSync(dest, zip, 'binary');
 
-  t.ok(typeof zip === 'string');
+  t.ok(zip instanceof Buffer);
 
   const sampleZip = fs.readFileSync(sample);
   const destZip = fs.readFileSync(dest);
