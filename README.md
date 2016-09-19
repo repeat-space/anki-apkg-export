@@ -4,7 +4,7 @@
 
 Universal module for generating Anki's decks.
 
-Port of ruby gem https://github.com/dennmart/anki
+Port of the Ruby gem https://github.com/albertzak/anki2
 
 ## Install
 
