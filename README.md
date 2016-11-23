@@ -99,10 +99,10 @@ apkg
 
 ## Examples
 
-- [server from above](example/server)
-- [browser from above](example/browser)
-- [browser usage with media attachments via ajax](example/browser-media-ajax)
-- [browser usage with media attachments via <form />](example/browser-media-file-input)
+- [server from above](examples/server)
+- [browser from above](examples/browser)
+- [browser usage with media attachments via ajax](examples/browser-media-ajax)
+- [browser usage with media attachments via <form />](examples/browser-media-file-input)
 
 ## Related
 
