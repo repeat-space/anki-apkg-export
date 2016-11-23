@@ -97,8 +97,16 @@ apkg
   .catch(err => console.log(err.stack || err));
 ```
 
+## Examples
+
+- [server from above](example/server)
+- [browser from above](example/browser)
+- [browser usage with media attachments via ajax](example/browser-media-file-input)
+- [browser usage with media attachments via <form />](example/browser-media-file-input)
+
 ## Related
 
+- [apkg format documentation](http://decks.wikia.com/wiki/Anki_APKG_format_documentation)
 - [anki-apkg-export-cli](https://github.com/ewnd9/anki-apkg-export-cli) - CLI for this module
 - [anki-apkg-export-app](https://github.com/ewnd9/anki-apkg-export-app) - Simple web app to generate cards online
 
