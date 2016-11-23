@@ -1,5 +1,7 @@
 import test from 'ava';
-import 'babel-core/register';
+
+import 'babel-register';
+import 'babel-polyfill';
 
 import AnkiExport from '../src/index';
 import fs from 'fs';
