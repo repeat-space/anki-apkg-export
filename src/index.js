@@ -15,7 +15,7 @@ if (process.env.APP_ENV === 'browser') {
 const Zip = require('jszip');
 const sha1 = require('sha1');
 
-const SEPARATOR = "\u001F";
+export const SEPARATOR = "\u001F";
 const rand = () => Math.random() * 100000000 | 0;
 
 function checksum(str) {

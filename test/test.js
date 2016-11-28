@@ -1,26 +1,25 @@
-"use strict";
 import test from 'ava';
 
 import 'babel-register';
 import 'babel-polyfill';
 
-import AnkiExport from '../src/index';
+import AnkiExport, { SEPARATOR } from '../src/index';
 import fs from 'fs';
-import  decompress from 'decompress';
-import _ from 'lodash';
+import decompress from 'decompress';
+import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
 import { exec } from  'child_process';
+import pify from 'pify';
 
-let SEPARATOR = "\u001F";
-let tmpDir = '/tmp/';
-let dest = tmpDir + 'result.apkg';
-let destUnpacked = tmpDir + 'unpacked_result';
-let destUnpackedDb = destUnpacked + '/collection.anki2';
-let sample = __dirname + '/fixtures/output.apkg';
+const tmpDir = '/tmp/';
+const dest = tmpDir + 'result.apkg';
+const destUnpacked = tmpDir + 'unpacked_result';
+const destUnpackedDb = destUnpacked + '/collection.anki2';
+const sample = __dirname + '/fixtures/output.apkg';
 
-let addCards = (apkg, list) => list.forEach(({front, back}) => apkg.addCard(front, back));
+const addCards = (apkg, list) => list.forEach(({front, back}) => apkg.addCard(front, back));
 
-test.beforeEach(async t => new Promise((resolve) => exec(`rm -rf ${dest} ${destUnpacked}`, resolve)));
+test.beforeEach(async t => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name');
@@ -34,7 +33,7 @@ test('equals to sample', async t => {
   const zip = await apkg.save();
   fs.writeFileSync(dest, zip, 'binary');
 
-  t.ok(zip instanceof Buffer);
+  t.truthy(zip instanceof Buffer);
 });
 
 test('check internal structure', async t => {
@@ -53,20 +52,18 @@ test('check internal structure', async t => {
   await decompress(dest, destUnpacked);
   // analize db via sqlite
   const db = new sqlite3.Database(destUnpackedDb);
-  const result = await new Promise((resolve, reject) => db.all(
+  const result = await pify(db.all.bind(db))(
     `SELECT
       notes.sfld as front,
       notes.flds as back
-      from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`,
-    (err, data) => err ? reject(err) : resolve(data)
-  ));
+      from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`);
   db.close();
 
   // compare content from just created db with original list of cards
-  const normilizedResult = _.sortBy(result.map(({front, back}) => ({
+  const normilizedResult = sortBy(result.map(({front, back}) => ({
     front,
     back: back.split(SEPARATOR).pop()
   })), 'front');
 
-  t.ok(_.isEqual(normilizedResult, cards));
+  t.deepEqual(normilizedResult, cards);
 });
