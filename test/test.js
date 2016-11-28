@@ -15,9 +15,8 @@ const tmpDir = '/tmp/';
 const dest = tmpDir + 'result.apkg';
 const destUnpacked = tmpDir + 'unpacked_result';
 const destUnpackedDb = destUnpacked + '/collection.anki2';
-const sample = __dirname + '/fixtures/output.apkg';
 
-test.beforeEach(async t => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
+test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name');

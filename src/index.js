@@ -10,17 +10,17 @@ if (process.env.APP_ENV === 'browser') {
 } else {
   sql = require('sql.js');
   template = require('fs').readFileSync(__dirname + '/../template.sql', 'utf-8');
-};
+}
 
 const Zip = require('jszip');
 const sha1 = require('sha1');
 
-export const SEPARATOR = "\u001F";
+export const SEPARATOR = '\u001F';
 const rand = () => Math.random() * 100000000 | 0;
 
 function checksum(str) {
   return parseInt(sha1(str).substr(0, 8), 16);
-};
+}
 
 export default function(deckName) {
   const options = {
@@ -81,11 +81,11 @@ export default function(deckName) {
   const media = [];
 
   function addMedia(filename, data) {
-    media.push({filename, data})
+    media.push({filename, data});
   }
 
   function addCard(front, back) {
-    const deck_id = top_deck_id
+    const deck_id = top_deck_id;
     const note_id = rand();
 
     update('insert into notes values(:a1,:a2,:a3,:a4,:a5,:a6,:a7,:a8,:a9,:a10,:a11)', {
@@ -122,7 +122,7 @@ export default function(deckName) {
       ':a17': 0,
       ':a18': ''
     });
-  };
+  }
 
   function save(options = {}) {
     const binaryArray = db.export();
@@ -142,11 +142,11 @@ export default function(deckName) {
     } else {
       return zip.generateAsync(Object.assign({}, { type: 'nodebuffer', base64: false, compression: 'DEFLATE' }, options));
     }
-  };
+  }
 
   return {
     addMedia,
     addCard,
     save
   };
-};
+}

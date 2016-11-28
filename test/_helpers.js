@@ -17,6 +17,6 @@ export const unzipDeckToDir = (pathToDeck, pathToUnzipTo) => {
                         const filePath = path.join(pathToUnzipTo, file.name);
                         return file
                             .async('nodebuffer')
-                            .then(data => fs.writeFileSync(filePath, data))
+                            .then(data => fs.writeFileSync(filePath, data));
                     })));
-}
+};

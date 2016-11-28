@@ -1,13 +1,26 @@
 {
   "parser": "babel-eslint",
+  "globals": {
+    "Promise": true
+  },
   "env": {
     "browser": true,
     "node": true
   },
   "plugins": [],
   "rules": {
+    "arrow-parens": [
+      2,
+      "as-needed"
+    ],
+    "keyword-spacing": 2,
+    "no-extra-semi": 2,
     "no-undef": 2,
     "no-unused-vars": 2,
-    "no-var": 2
+    "no-var": 2,
+    "semi": [
+      2,
+      "always"
+    ]
   }
 }
