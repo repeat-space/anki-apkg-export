@@ -5,19 +5,17 @@ import 'babel-polyfill';
 
 import AnkiExport, { SEPARATOR } from '../src/index';
 import fs from 'fs';
-import decompress from 'decompress';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
 import { exec } from  'child_process';
 import pify from 'pify';
+import { addCards, unzipDeckToDir } from './_helpers';
 
 const tmpDir = '/tmp/';
 const dest = tmpDir + 'result.apkg';
 const destUnpacked = tmpDir + 'unpacked_result';
 const destUnpackedDb = destUnpacked + '/collection.anki2';
 const sample = __dirname + '/fixtures/output.apkg';
-
-const addCards = (apkg, list) => list.forEach(({front, back}) => apkg.addCard(front, back));
 
 test.beforeEach(async t => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
@@ -49,7 +47,7 @@ test('check internal structure', async t => {
   fs.writeFileSync(dest, zip, 'binary');
 
   // extract dec to tmp directory
-  await decompress(dest, destUnpacked);
+  await unzipDeckToDir(dest, destUnpacked);
   // analize db via sqlite
   const db = new sqlite3.Database(destUnpackedDb);
   const result = await pify(db.all.bind(db))(
