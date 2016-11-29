@@ -9,8 +9,10 @@ import {
   getAddCard,
   getDb,
   getLastItem,
+  getSave,
   getSql,
   getTemplate,
+  getZip,
   rand
 } from '../src/helpers';
 
@@ -67,6 +69,7 @@ test('getDb', t => {
 });
 
 test('getAddCard', t => {
+  t.plan(11);
   t.is(typeof getAddCard, 'function', 'should be a function');
   t.is(typeof getAddCard(), 'function', 'should return a function');
 
@@ -92,3 +95,41 @@ test('getAddCard', t => {
   t.is(cardsUpdate[':did'], topDeckId);
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
 });
+
+test('getZip', t => {
+  t.plan(4);
+  t.is(typeof getZip, 'function', 'should be a function');
+
+  const zip = getZip();
+  t.truthy(typeof zip === 'object' && !!zip, 'should be an object');
+  t.is(typeof zip.file, 'function', 'zip should contains file method');
+  t.is(typeof zip.generateAsync, 'function', 'zip should contains generateAsync method');
+});
+
+test('getSave', t => {
+  t.is(typeof getSave, 'function', 'should be a function');
+  t.is(typeof getSave(), 'function', 'should return a function');
+
+  const flags = {};
+  const dbMock = { export: () => flags['db.export'] = 'Some data' };
+  const zipMock = {
+    file: (path, content) => flags[`zip.file(${path})`] = content,
+    generateAsync: options => flags[`zip.generateAsync`] = options
+  };
+  const mediaMock = [];
+  const save = getSave(zipMock, dbMock, mediaMock);
+
+  // it should process media by reference
+  mediaMock.push({filename: '1.jpg'}, {filename: '2.bmp'});
+
+  save({some: 'options', should: { be: 'here'}});
+  const flagsKeys = Object.keys(flags);
+  t.truthy(flagsKeys.includes('db.export'), 'should call .export on db');
+  t.truthy(flagsKeys.includes('zip.file(collection.anki2)'), 'should save notes/cards db');
+  t.truthy(flagsKeys.includes('zip.file(media)'), 'should save media');
+  t.truthy(flagsKeys.includes('zip.file(0)'), 'should save media with two files');
+  t.truthy(flagsKeys.includes('zip.file(1)'), 'should save media with two files');
+  t.truthy(flagsKeys.includes('zip.generateAsync'), 'should call zip.generateAsync');
+  t.truthy(['blob', 'nodebuffer'].includes(flags['zip.generateAsync'].type), 'zip generates binary file');
+});
+

@@ -1,10 +1,12 @@
 'use strict';
-const Zip = require('jszip');
+
 const {
   getAddCard,
   getDb,
   getLastItem,
+  getSave,
   getTemplate,
+  getZip,
   rand
 } = require('./helpers');
 
@@ -74,25 +76,16 @@ export default function(deckName) {
     SEPARATOR
   );
 
-  function save(options = {}) {
-    const binaryArray = db.export();
-    const zip = new Zip();
-    const mediaObj = media.reduce((prev, curr, idx) => {
-      prev[idx] = curr.filename;
-      return prev;
-    }, {});
-
-    zip.file('collection.anki2', new Buffer(binaryArray));
-    zip.file('media', JSON.stringify(mediaObj));
-
-    media.forEach((item, i) => zip.file(i, item.data));
-
-    if (process.env.APP_ENV === 'browser') {
-      return zip.generateAsync(Object.assign({}, { type: 'blob' }, options));
-    } else {
-      return zip.generateAsync(Object.assign({}, { type: 'nodebuffer', base64: false, compression: 'DEFLATE' }, options));
-    }
-  }
+  /**
+   * Save db into file
+   * @param options
+   * @returns {*}
+   */
+  const save = getSave(
+    getZip(),
+    db,
+    media
+  );
 
   return {
     addMedia,
