@@ -136,6 +136,7 @@ test('getSave', t => {
 });
 
 test('getMedia', t => {
+  t.plan(10);
   t.is(typeof getMedia, 'function', 'should be a function');
 
   const media = getMedia();
