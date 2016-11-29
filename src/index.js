@@ -13,12 +13,13 @@ if (process.env.APP_ENV === 'browser') {
 }
 
 const Zip = require('jszip');
-const { checksum } = require('./_helpers');
+const {
+  checksum,
+  getLastItem
+} = require('./helpers');
 
 export const SEPARATOR = '\u001F';
 const rand = () => Math.random() * 100000000 | 0;
-
-
 
 export default function(deckName) {
   const options = {
@@ -39,16 +40,6 @@ export default function(deckName) {
 
   const getFirstVal = query => JSON.parse(db.exec(query)[0].values[0]);
   const decks = getFirstVal('select decks from col');
-
-  const getLastItem = obj => {
-    const keys = Object.keys(obj);
-    const lastKey = keys[keys.length - 1];
-
-    const item = obj[lastKey];
-    delete obj[lastKey];
-
-    return item;
-  };
 
   const deck = getLastItem(decks);
 
