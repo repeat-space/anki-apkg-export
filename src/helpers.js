@@ -101,3 +101,11 @@ export const getSave = (zip, db, media) => (options = {}) => {
     return zip.generateAsync(Object.assign({}, { type: 'nodebuffer', base64: false, compression: 'DEFLATE' }, options));
   }
 };
+
+export const getMedia = () => {
+  const content = [];
+  return {
+    getContent: () => content,
+    addMedia: (filename, data) => content.push({filename, data})
+  };
+};

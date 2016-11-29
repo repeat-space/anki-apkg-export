@@ -4,6 +4,7 @@ const {
   getAddCard,
   getDb,
   getLastItem,
+  getMedia,
   getSave,
   getTemplate,
   getZip,
@@ -58,11 +59,7 @@ export default function(deckName) {
   update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   // console.log(getFirstVal('select models from col'));
 
-  const media = [];
-
-  function addMedia(filename, data) {
-    media.push({filename, data});
-  }
+  const media = getMedia();
 
   /**
    *
@@ -84,11 +81,11 @@ export default function(deckName) {
   const save = getSave(
     getZip(),
     db,
-    media
+    media.getContent()
   );
 
   return {
-    addMedia,
+    addMedia: media.addMedia,
     addCard,
     save
   };
