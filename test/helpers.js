@@ -147,9 +147,10 @@ test('getMedia', t => {
   t.truthy(getMedia() !== getMedia(), 'should return new object each time');
   t.truthy(getMedia().getContent() !== getMedia().getContent(), 'content should be different each time');
 
+  const  { addMedia } = media; // it will be called with untethered context
   t.deepEqual(media.getContent(), []);
-  media.addMedia('some.file', 'data');
+  addMedia('some.file', 'data');
   t.deepEqual(media.getContent(), [{ filename: 'some.file', data: 'data' }]);
-  media.addMedia('another.file', 'new data');
+  addMedia('another.file', 'new data');
   t.deepEqual(media.getContent(), [{ filename: 'some.file', data: 'data' }, { filename: 'another.file', data: 'new data' }]);
 });
