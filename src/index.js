@@ -1,25 +1,14 @@
 'use strict';
-
-let sql = null;
-let template = null;
-
-if (process.env.APP_ENV === 'browser') {
-  require('script!sql.js');
-  sql = window.SQL;
-  template = require('!raw!./../template.sql');
-} else {
-  sql = require('sql.js');
-  template = require('fs').readFileSync(__dirname + '/../template.sql', 'utf-8');
-}
-
 const Zip = require('jszip');
 const {
   checksum,
-  getLastItem
+  getLastItem,
+  getSql,
+  getTemplate,
+  rand
 } = require('./helpers');
 
 export const SEPARATOR = '\u001F';
-const rand = () => Math.random() * 100000000 | 0;
 
 export default function(deckName) {
   const options = {
@@ -33,8 +22,9 @@ export default function(deckName) {
     }`
   };
 
+  const sql = getSql();
   const db = new sql.Database();
-  db.run(template);
+  db.run(getTemplate());
 
   const top_deck_id = rand();
 

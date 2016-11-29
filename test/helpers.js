@@ -1,11 +1,15 @@
 import test from 'ava';
 
+import fs from 'fs';
+import path from 'path';
 import 'babel-register';
 import 'babel-polyfill';
-
 import {
     checksum,
-    getLastItem
+    getLastItem,
+    getSql,
+    getTemplate,
+    rand
 } from '../src/helpers';
 
 test('checksum', t => {
@@ -25,4 +29,26 @@ test('getLastItem', t => {
   const obj = {a: 0, b: 1};
   getLastItem(obj);
   t.deepEqual(obj, {a: 0}, 'mutate passed param and remove extracted key');
+});
+
+test('getTemplate', t => {
+  t.plan(2);
+  t.is(typeof getTemplate, 'function', 'should be a function');
+  let template = fs.readFileSync(path.join(__dirname, '../template.sql'), 'utf-8');
+  t.is(getTemplate(), template, 'should return correct template');
+});
+
+test('getSql', t => {
+  t.plan(3);
+  t.is(typeof getSql, 'function', 'should be a function');
+
+  const sql = getSql();
+  t.truthy(typeof sql === 'object' && !!sql, 'should be an object');
+  t.is(typeof sql.Database, 'function', 'should contains Database constructor');
+});
+
+test('rand', t => {
+  t.plan(2);
+  t.is(typeof rand, 'function', 'should be a function');
+  t.is(typeof rand(), 'number', 'should return a number');
 });
