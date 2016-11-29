@@ -35,3 +35,5 @@ export const getSql = () => {
 };
 
 export const rand = () => Math.random() * 100000000 | 0;
+
+export const getDb = () => new (getSql().Database)();

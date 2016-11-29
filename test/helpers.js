@@ -6,6 +6,7 @@ import 'babel-register';
 import 'babel-polyfill';
 import {
     checksum,
+    getDb,
     getLastItem,
     getSql,
     getTemplate,
@@ -51,4 +52,15 @@ test('rand', t => {
   t.plan(2);
   t.is(typeof rand, 'function', 'should be a function');
   t.is(typeof rand(), 'number', 'should return a number');
+});
+
+test('getDb', t => {
+  t.plan(5);
+  t.is(typeof getDb, 'function', 'should be a function');
+
+  const db = getDb();
+  t.truthy(typeof db === 'object' && !!db, 'should be an object');
+  t.is(typeof db.run, 'function', 'db should contains run method');
+  t.is(typeof db.exec, 'function', 'db should contains run method');
+  t.is(typeof db.export, 'function', 'db should contains run method');
 });

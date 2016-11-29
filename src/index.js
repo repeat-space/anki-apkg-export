@@ -2,8 +2,8 @@
 const Zip = require('jszip');
 const {
   checksum,
+  getDb,
   getLastItem,
-  getSql,
   getTemplate,
   rand
 } = require('./helpers');
@@ -22,8 +22,7 @@ export default function(deckName) {
     }`
   };
 
-  const sql = getSql();
-  const db = new sql.Database();
+  const db = getDb();
   db.run(getTemplate());
 
   const top_deck_id = rand();
