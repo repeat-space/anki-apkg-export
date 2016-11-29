@@ -13,14 +13,12 @@ if (process.env.APP_ENV === 'browser') {
 }
 
 const Zip = require('jszip');
-const sha1 = require('sha1');
+const { checksum } = require('./_helpers');
 
 export const SEPARATOR = '\u001F';
 const rand = () => Math.random() * 100000000 | 0;
 
-function checksum(str) {
-  return parseInt(sha1(str).substr(0, 8), 16);
-}
+
 
 export default function(deckName) {
   const options = {
