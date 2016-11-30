@@ -43,7 +43,8 @@ export default class {
   }
 
   update(query, obj) {
-    return this.db.prepare(query).getAsObject(obj);
+    this.db.prepare(query).getAsObject(obj);
+    return this;
   }
 
   addCard(front, back) {
@@ -64,7 +65,7 @@ export default class {
       ':data': '' // text not null,
     });
 
-    this.update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
+    return this.update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
       ':id': rand(), // integer primary key,
       ':nid': note_id, // integer not null,
       ':did': topDeckId, // integer not null,
@@ -99,8 +100,7 @@ export default class {
     model.did = did;
     model.id = id;
     models[id + ''] = model;
-    this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
-
+    return this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   }
 
   updateInitialDecksWith({name, top_deck_id}) {
@@ -109,7 +109,7 @@ export default class {
     deck.name = name;
     deck.id = top_deck_id;
     decks[top_deck_id + ''] = deck;
-    this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
+    return this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
   }
 
   _getFirstVal(query) {
