@@ -3,7 +3,6 @@
 import {
   getDb,
   getCssTemplate,
-  getLastItem,
   getTemplate,
   getZip,
 }  from './helpers';
@@ -11,36 +10,22 @@ import Exporter from './exporter';
 export {SEPARATOR} from './exporter';
 
 export default function(deckName) {
-  const db = getDb();
-  const zip = getZip();
-  const exporter = new Exporter(db, zip);
-  const top_deck_id = exporter.topDeckId;
-  const top_model_id = exporter.topModelId;
+  const exporter = new Exporter(getDb(), getZip());
+  const { topDeckId, topModelId } = exporter;
 
-  const getFirstVal = query => JSON.parse(db.exec(query)[0].values[0]);
+  exporter.db.run(getTemplate());
 
-  db.run(getTemplate());
+  exporter.updateInitialDecksWith({
+    name: deckName,
+    top_deck_id: topDeckId
+  });
 
-  const decks = getFirstVal('select decks from col');
-
-  const deck = getLastItem(decks);
-  deck.name = deckName;
-  deck.id = top_deck_id;
-  decks[top_deck_id + ''] = deck;
-
-  exporter.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
-
-  const models = getFirstVal('select models from col');
-
-  const model = getLastItem(models);
-  model.name = deckName;
-  model.css = getCssTemplate();
-  model.did = top_deck_id;
-  model.id = top_model_id;
-
-  models[top_model_id + ''] = model;
-
-  exporter.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
+  exporter.updateInitialModelsWith({
+    name: deckName,
+    css: getCssTemplate(),
+    did: topDeckId,
+    id: topModelId,
+  });
 
   return ['addCard', 'addMedia', 'save'].reduce((prev, i) => {
     prev[i] = exporter[i];

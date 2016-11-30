@@ -1,6 +1,7 @@
 import {
   rand,
-  checksum
+  checksum,
+  getLastItem
 } from './helpers';
 const EXPORTED_METHODS = ['save', 'addMedia', 'addCard', 'update'];
 export const SEPARATOR = '\u001F';
@@ -83,5 +84,35 @@ export default class {
       ':flags': 0, // integer not null,
       ':data': '' // text not null
     });
+  }
+
+  getInitialRowValue(table, column = 'id') {
+    const query = `select ${column} from ${table}`;
+    return this._getFirstVal(query);
+  }
+
+  updateInitialModelsWith({name, css, did, id}) {
+    const models = this.getInitialRowValue('col', 'models');
+    const model = getLastItem(models);
+    model.name = name;
+    model.css = css;
+    model.did = did;
+    model.id = id;
+    models[id + ''] = model;
+    this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
+
+  }
+
+  updateInitialDecksWith({name, top_deck_id}) {
+    const decks = this.getInitialRowValue('col', 'decks');
+    const deck = getLastItem(decks);
+    deck.name = name;
+    deck.id = top_deck_id;
+    decks[top_deck_id + ''] = deck;
+    this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
+  }
+
+  _getFirstVal(query) {
+    return JSON.parse(this.db.exec(query)[0].values[0]);
   }
 }
