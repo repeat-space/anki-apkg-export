@@ -92,27 +92,34 @@ export default class {
     return this._getFirstVal(query);
   }
 
-  updateInitialModelsWith({name, css, did, id}) {
+  updateInitialModelWith(name, css) {
+    const id = this.topModelId;
     const models = this.getInitialRowValue('col', 'models');
     const model = getLastItem(models);
     model.name = name;
     model.css = css;
-    model.did = did;
+    model.did = this.topDeckId;
     model.id = id;
     models[id + ''] = model;
     return this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   }
 
-  updateInitialDecksWith({name, top_deck_id}) {
+  updateInitialDeck(name) {
+    const { topDeckId } = this;
     const decks = this.getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
     deck.name = name;
-    deck.id = top_deck_id;
-    decks[top_deck_id + ''] = deck;
+    deck.id = topDeckId;
+    decks[topDeckId + ''] = deck;
     return this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
   }
 
   _getFirstVal(query) {
     return JSON.parse(this.db.exec(query)[0].values[0]);
+  }
+
+  dbRun(...args) {
+    this.db.run(...args);
+    return this;
   }
 }
