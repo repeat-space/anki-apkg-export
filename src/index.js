@@ -1,47 +1,31 @@
 'use strict';
 
-const {
-  getAddCard,
+import {
   getDb,
   getCssTemplate,
   getLastItem,
-  getMedia,
-  getSave,
   getTemplate,
   getZip,
-  rand
-} = require('./helpers');
+}  from './helpers';
+import Exporter from './exporter';
+export { SEPARATOR } from './exporter';
 
-export const SEPARATOR = '\u001F';
 
 export default function(deckName) {
   const db = getDb();
-  const media = getMedia();
-  const top_deck_id = rand();
-  const top_model_id = rand();
+  const zip = getZip();
+  const exporter = new Exporter(db, zip);
+  const top_deck_id = exporter.topDeckId;
+  const top_model_id = exporter.topModelId;
 
-  const update = (query, obj) => db.prepare(query).getAsObject(obj);
   const getFirstVal = query => JSON.parse(db.exec(query)[0].values[0]);
-  /**
-   * @param front
-   * @param back
-   */
-  const addCard = getAddCard(
-    update,
-    top_deck_id,
-    top_model_id,
-    SEPARATOR
-  );
-  /**
-   * Save db into file
-   * @param options
-   * @returns {*}
-   */
-  const save = getSave(
-    getZip(),
-    db,
-    media.getContent()
-  );
+
+  const {
+    addCard,
+    addMedia,
+    save,
+    update
+  } = exporter;
 
   db.run(getTemplate());
 
@@ -67,7 +51,7 @@ export default function(deckName) {
   update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
 
   return {
-    addMedia: media.addMedia,
+    addMedia,
     addCard,
     save
   };
