@@ -8,8 +8,7 @@ import {
   getZip,
 }  from './helpers';
 import Exporter from './exporter';
-export { SEPARATOR } from './exporter';
-
+export {SEPARATOR} from './exporter';
 
 export default function(deckName) {
   const db = getDb();
@@ -20,13 +19,6 @@ export default function(deckName) {
 
   const getFirstVal = query => JSON.parse(db.exec(query)[0].values[0]);
 
-  const {
-    addCard,
-    addMedia,
-    save,
-    update
-  } = exporter;
-
   db.run(getTemplate());
 
   const decks = getFirstVal('select decks from col');
@@ -36,7 +28,7 @@ export default function(deckName) {
   deck.id = top_deck_id;
   decks[top_deck_id + ''] = deck;
 
-  update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
+  exporter.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
 
   const models = getFirstVal('select models from col');
 
@@ -48,11 +40,10 @@ export default function(deckName) {
 
   models[top_model_id + ''] = model;
 
-  update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
+  exporter.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
 
-  return {
-    addMedia,
-    addCard,
-    save
-  };
+  return ['addCard', 'addMedia', 'save'].reduce((prev, i) => {
+    prev[i] = exporter[i];
+    return prev;
+  }, {});
 }
