@@ -7,6 +7,7 @@ import 'babel-polyfill';
 import {
   checksum,
   getAddCard,
+  getCssTemplate,
   getDb,
   getLastItem,
   getMedia,
@@ -39,8 +40,15 @@ test('getLastItem', t => {
 test('getTemplate', t => {
   t.plan(2);
   t.is(typeof getTemplate, 'function', 'should be a function');
-  let template = fs.readFileSync(path.join(__dirname, '../template.sql'), 'utf-8');
+  let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
   t.is(getTemplate(), template, 'should return correct template');
+});
+
+test('getCssTemplate', t => {
+  t.plan(2);
+  t.is(typeof getCssTemplate, 'function', 'should be a function');
+  let template = fs.readFileSync(path.join(__dirname, '../templates/template.css'), 'utf-8');
+  t.is(getCssTemplate(), template, 'should return correct template');
 });
 
 test('getSql', t => {

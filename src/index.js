@@ -3,6 +3,7 @@
 const {
   getAddCard,
   getDb,
+  getCssTemplate,
   getLastItem,
   getMedia,
   getSave,
@@ -14,16 +15,6 @@ const {
 export const SEPARATOR = '\u001F';
 
 export default function(deckName) {
-  const options = {
-    name: deckName,
-    model_name: deckName,
-    css: ` .card {
-      font-family: arial;
-      font-size: 20px;
-      text-align: center;
-      color: black;
-    }`
-  };
   const db = getDb();
   const media = getMedia();
   const top_deck_id = rand();
@@ -57,7 +48,7 @@ export default function(deckName) {
   const decks = getFirstVal('select decks from col');
 
   const deck = getLastItem(decks);
-  deck.name = options.name;
+  deck.name = deckName;
   deck.id = top_deck_id;
   decks[top_deck_id + ''] = deck;
 
@@ -66,8 +57,8 @@ export default function(deckName) {
   const models = getFirstVal('select models from col');
 
   const model = getLastItem(models);
-  model.name = options.name;
-  model.css = options.css;
+  model.name = deckName;
+  model.css = getCssTemplate();
   model.did = top_deck_id;
   model.id = top_model_id;
 

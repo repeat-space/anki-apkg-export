@@ -12,17 +12,6 @@ export const getLastItem = obj => {
   return item;
 };
 
-export const getTemplate = () => {
-  let template;
-  if (process.env.APP_ENV === 'browser') {
-    require('script!sql.js');
-    template = require('!raw!./../template.sql');
-  } else {
-    template = require('fs').readFileSync(__dirname + '/../template.sql', 'utf-8');
-  }
-  return template;
-};
-
 export const getSql = () => {
   let sql;
   if (process.env.APP_ENV === 'browser') {
@@ -108,4 +97,26 @@ export const getMedia = () => {
     getContent: () => content,
     addMedia: (filename, data) => content.push({filename, data})
   };
+};
+
+export const getCssTemplate = () => {
+  let template;
+  if (process.env.APP_ENV === 'browser') {
+    require('script!sql.js');
+    template = require('!raw!./../templates/template.css');
+  } else {
+    template = require('fs').readFileSync(__dirname + '/../templates/template.css', 'utf-8');
+  }
+  return template;
+};
+
+export const getTemplate = () => {
+  let template;
+  if (process.env.APP_ENV === 'browser') {
+    require('script!sql.js');
+    template = require('!raw!./../templates/template.sql');
+  } else {
+    template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
+  }
+  return template;
 };
