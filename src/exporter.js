@@ -3,19 +3,31 @@ import {
   checksum,
   getLastItem
 } from './helpers';
-const EXPORTED_METHODS = ['save', 'addMedia', 'addCard', 'update'];
+
 export const SEPARATOR = '\u001F';
 
+export const css = `.card {
+    font-family: arial;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+  }`;
+
 export default class {
-  constructor(db, zip) {
+  constructor(deckName, db, zip) {
+    this.deckName = deckName;
     this.db = db;
     this.zip = zip;
     this.media = [];
     this.topDeckId = rand();
     this.topModelId = rand();
     this.separator = SEPARATOR;
+    this.css = css;
 
-    EXPORTED_METHODS.forEach(methodName => this[methodName] = this[methodName].bind(this));
+    return this
+      .dbRun(this.getTemplate())
+      .updateInitialDeck()
+      .updateInitialModelWith();
   }
 
   save(options) {
@@ -92,23 +104,34 @@ export default class {
     return this._getFirstVal(query);
   }
 
-  updateInitialModelWith(name, css) {
+  updateInitialModelWith() {
     const id = this.topModelId;
     const models = this.getInitialRowValue('col', 'models');
     const model = getLastItem(models);
-    model.name = name;
-    model.css = css;
+    model.name = this.deckName;
+    model.css = this.css;
     model.did = this.topDeckId;
     model.id = id;
     models[id + ''] = model;
     return this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   }
 
-  updateInitialDeck(name) {
+  getTemplate() {
+    let template;
+    if (process.env.APP_ENV === 'browser') {
+      require('script!sql.js');
+      template = require('!raw!./../templates/template.sql');
+    } else {
+      template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
+    }
+    return template;
+  }
+
+  updateInitialDeck() {
     const { topDeckId } = this;
     const decks = this.getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
-    deck.name = name;
+    deck.name = this.deckName;
     deck.id = topDeckId;
     decks[topDeckId + ''] = deck;
     return this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });

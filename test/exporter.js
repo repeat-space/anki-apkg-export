@@ -5,27 +5,19 @@ import 'babel-register';
 import 'babel-polyfill';
 
 import Exporter from '../src/exporter';
-import { checksum } from '../src/helpers';
+import { checksum, getDb } from '../src/helpers';
 
-let dbMock;
-let zipMock;
 let exporter;
 
 test.beforeEach(() => {
-  dbMock = {
-    export: () => "data",
-    prepare: () => ({getAsObject: () => null })
-  };
-  zipMock = {
+  exporter = new Exporter('testDeckName', getDb(), {
     file: () => null,
     generateAsync: () => null
-  };
-  exporter = new Exporter(dbMock, zipMock);
+  });
 });
 
 test('Exporter class exists', t => {
-  t.truthy(new Exporter instanceof Exporter, 'Exporter is constructor');
-  t.truthy(new Exporter !== new Exporter, 'Exporter is not singleton');
+  t.truthy(exporter instanceof Exporter, 'Exporter is constructor');
 });
 
 test('Exporter.addMedia', t => {
@@ -38,9 +30,9 @@ test('Exporter.addMedia', t => {
 });
 
 test('Exporter.save', t => {
-  const dbExportSpy = sinon.spy(dbMock, 'export');
-  const zipFileSpy = sinon.spy(zipMock, 'file');
-  const zipGenerateAsyncSpy = sinon.spy(zipMock, 'generateAsync');
+  const dbExportSpy = sinon.spy(exporter.db, 'export');
+  const zipFileSpy = sinon.spy(exporter.zip, 'file');
+  const zipGenerateAsyncSpy = sinon.spy(exporter.zip, 'generateAsync');
 
   t.is(typeof exporter.save, 'function', 'should be a function');
 

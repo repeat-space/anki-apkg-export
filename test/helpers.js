@@ -1,16 +1,12 @@
 import test from 'ava';
 
-import fs from 'fs';
-import path from 'path';
 import 'babel-register';
 import 'babel-polyfill';
 import {
   checksum,
-  getCssTemplate,
   getDb,
   getLastItem,
   getSql,
-  getTemplate,
   getZip,
   rand
 } from '../src/helpers';
@@ -31,17 +27,11 @@ test('getLastItem', t => {
   t.deepEqual(obj, { a: 0 }, 'mutate passed param and remove extracted key');
 });
 
-test('getTemplate', t => {
-  t.is(typeof getTemplate, 'function', 'should be a function');
-  let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
-  t.is(getTemplate(), template, 'should return correct template');
-});
-
-test('getCssTemplate', t => {
-  t.is(typeof getCssTemplate, 'function', 'should be a function');
-  let template = fs.readFileSync(path.join(__dirname, '../templates/template.css'), 'utf-8');
-  t.is(getCssTemplate(), template, 'should return correct template');
-});
+// test('getTemplate', t => {
+//   t.is(typeof getTemplate, 'function', 'should be a function');
+//   let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
+//   t.is(getTemplate(), template, 'should return correct template');
+// });
 
 test('getSql', t => {
   t.is(typeof getSql, 'function', 'should be a function');
