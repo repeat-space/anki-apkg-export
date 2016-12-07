@@ -7,20 +7,21 @@ import 'babel-polyfill';
 import Exporter from '../src/exporter';
 import { checksum, getDb } from '../src/helpers';
 
-let exporter;
-
-test.beforeEach(() => {
-  exporter = new Exporter('testDeckName', getDb(), {
+test.beforeEach(t => {
+  t.context.exporter = new Exporter('testDeckName', getDb(), {
     file: () => null,
     generateAsync: () => null
   });
 });
 
 test('Exporter class exists', t => {
+  const { exporter } = t.context;
+
   t.truthy(exporter instanceof Exporter, 'Exporter is constructor');
 });
 
 test('Exporter.addMedia', t => {
+  const { exporter } = t.context;
   t.truthy(exporter.media instanceof Array);
   t.deepEqual(exporter.media, []);
   exporter.addMedia('some.file', 'data');
@@ -30,6 +31,7 @@ test('Exporter.addMedia', t => {
 });
 
 test('Exporter.save', t => {
+  const { exporter } = t.context;
   const dbExportSpy = sinon.spy(exporter.db, 'export');
   const zipFileSpy = sinon.spy(exporter.zip, 'file');
   const zipGenerateAsyncSpy = sinon.spy(exporter.zip, 'generateAsync');
@@ -49,6 +51,8 @@ test('Exporter.save', t => {
 });
 
 test('Exporter.addCard', t => {
+  const { exporter } = t.context;
+
   t.is(typeof exporter.addCard, 'function', 'should be a function');
   const { topDeckId, topModelId, separator } = exporter;
   const [front, back] = [5, 9, '!separator!', 'Test Front', 'Test back'];
