@@ -10,7 +10,9 @@ import sqlite3 from 'sqlite3';
 import { exec } from  'child_process';
 import pify from 'pify';
 import { addCards, unzipDeckToDir } from './_helpers';
+import sql from 'sql.js';
 
+const template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 const tmpDir = '/tmp/';
 const dest = tmpDir + 'result.apkg';
 const destUnpacked = tmpDir + 'unpacked_result';
@@ -19,7 +21,10 @@ const destUnpackedDb = destUnpacked + '/collection.anki2';
 test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
-  const apkg = new AnkiExport('deck-name');
+  const apkg = new AnkiExport('deck-name', {
+    template,
+    db: new sql.Database()
+  });
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
 
@@ -35,7 +40,10 @@ test('equals to sample', async t => {
 
 test('check internal structure', async t => {
   // Create deck as in previous example
-  const apkg = new AnkiExport('deck-name');
+  const apkg = new AnkiExport('deck-name', {
+    template,
+    db: new sql.Database()
+  });
   const cards = [
     { front: 'card #1 front', back: 'card #1 back' },
     { front: 'card #2 front', back: 'card #2 back' },

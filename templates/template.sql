@@ -1,5 +1,6 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+DROP TABLE IF EXISTS col;
 CREATE TABLE col (
     id              integer primary key,
     crt             integer not null,
@@ -30,6 +31,7 @@ INSERT INTO "col" VALUES(
   '{"1": {"name": "Default", "replayq": true, "lapse": {"leechFails": 8, "minInt": 1, "delays": [10], "leechAction": 0, "mult": 0}, "rev": {"perDay": 100, "fuzz": 0.05, "ivlFct": 1, "maxIvl": 36500, "ease4": 1.3, "bury": true, "minSpace": 1}, "timer": 0, "maxTaken": 60, "usn": 0, "new": {"perDay": 20, "delays": [1, 10], "separate": true, "ints": [1, 4, 7], "initialFactor": 2500, "bury": true, "order": 1}, "mod": 0, "id": 1, "autoplay": true}}',
   '{}'
 );
+DROP TABLE IF EXISTS notes;
 CREATE TABLE notes (
     id              integer primary key,   /* 0 */
     guid            text not null,         /* 1 */
@@ -43,6 +45,7 @@ CREATE TABLE notes (
     flags           integer not null,      /* 9 */
     data            text not null          /* 10 */
 );
+DROP TABLE IF EXISTS cards;
 CREATE TABLE cards (
     id              integer primary key,   /* 0 */
     nid             integer not null,      /* 1 */
@@ -63,6 +66,7 @@ CREATE TABLE cards (
     flags           integer not null,      /* 16 */
     data            text not null          /* 17 */
 );
+DROP TABLE IF EXISTS revlog;
 CREATE TABLE revlog (
     id              integer primary key,
     cid             integer not null,
@@ -74,6 +78,7 @@ CREATE TABLE revlog (
     time            integer not null,
     type            integer not null
 );
+DROP TABLE IF EXISTS graves;
 CREATE TABLE graves (
     usn             integer not null,
     oid             integer not null,
