@@ -1,7 +1,6 @@
 import sha1 from 'sha1';
 import Zip from 'jszip';
 
-
 export default class {
   constructor(deckName, { template, db }) {
     const topDeckId = rand();
@@ -27,7 +26,7 @@ export default class {
     const deck = getLastItem(decks);
     deck.name = this.deckName;
     deck.id = topDeckId;
-    decks[topDeckId + ''] = deck;
+    decks[ topDeckId + '' ] = deck;
     this._update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
 
     const models = this._getInitialRowValue('col', 'models');
@@ -36,7 +35,7 @@ export default class {
     model.css = this.css;
     model.did = this.topDeckId;
     model.id = topModelId;
-    models[`${topModelId}`] = model;
+    models[ `${topModelId}` ] = model;
     this._update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
 
     return this;
@@ -46,7 +45,7 @@ export default class {
     const { zip, db, media } = this;
     const binaryArray = db.export();
     const mediaObj = media.reduce((prev, curr, idx) => {
-      prev[idx] = curr.filename;
+      prev[ idx ] = curr.filename;
       return prev;
     }, {});
 
@@ -125,7 +124,7 @@ export default class {
   }
 
   _getFirstVal(query) {
-    return JSON.parse(this.db.exec(query)[0].values[0]);
+    return JSON.parse(this.db.exec(query)[ 0 ].values[ 0 ]);
   }
 }
 
@@ -135,10 +134,10 @@ export const rand = () => Math.random() * 100000000 | 0;
 
 export const getLastItem = obj => {
   const keys = Object.keys(obj);
-  const lastKey = keys[keys.length - 1];
+  const lastKey = keys[ keys.length - 1 ];
 
-  const item = obj[lastKey];
-  delete obj[lastKey];
+  const item = obj[ lastKey ];
+  delete obj[ lastKey ];
 
   return item;
 };

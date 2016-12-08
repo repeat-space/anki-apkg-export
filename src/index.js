@@ -1,7 +1,7 @@
 'use strict';
 
 import Exporter from './exporter';
-export {SEPARATOR} from './exporter';
+export { SEPARATOR } from './exporter';
 
 const isBrowser = process.env.APP_ENV === 'browser';
 
@@ -21,7 +21,7 @@ if (isBrowser) {
 }
 const db = new sql.Database();
 
-export default function(deckName) {
+export default function (deckName) {
   return new Exporter(deckName, {
     db,
     template

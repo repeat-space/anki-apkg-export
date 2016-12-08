@@ -10,7 +10,7 @@ import 'babel-polyfill';
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 // Mock Exporter dependencies
 const Exporter = proxyquire('../src/exporter', {
-  jszip: function() {
+  jszip: function () {
     this.file = () => null;
     this.generateAsync = () => null;
   }
@@ -29,7 +29,7 @@ test('Exporter.save', t => {
   const zipFileSpy = sinon.spy(exporter.zip, 'file');
   const zipGenerateAsyncSpy = sinon.spy(exporter.zip, 'generateAsync');
 
-  exporter.media = [{ filename: '1.jpg' }, { filename: '2.bmp' }];
+  exporter.media = [ { filename: '1.jpg' }, { filename: '2.bmp' } ];
   exporter.save({ some: 'options', should: { be: 'here' } });
 
   t.truthy(dbExportSpy.called, 'should call .export on db');
@@ -38,28 +38,28 @@ test('Exporter.save', t => {
   t.truthy(zipFileSpy.calledWithMatch(0), 'should save media with two files');
   t.truthy(zipFileSpy.calledWithMatch(1), 'should save media with two files');
   t.truthy(zipGenerateAsyncSpy.called, 'should call zip.generateAsync');
-  t.truthy(['blob', 'nodebuffer'].includes(zipGenerateAsyncSpy.args[0][0].type), 'zip generates binary file');
+  t.truthy([ 'blob', 'nodebuffer' ].includes(zipGenerateAsyncSpy.args[ 0 ][ 0 ].type), 'zip generates binary file');
 });
 
 test('Exporter.addCard', t => {
   const { exporter } = t.context;
 
   const { topDeckId, topModelId, separator } = exporter;
-  const [front, back] = ['Test Front', 'Test back'];
+  const [front, back] = [ 'Test Front', 'Test back' ];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
 
   exporter.addCard(front, back);
 
   t.is(exporterUpdateSpy.callCount, 2, 'should made two requests');
 
-  t.is(exporterUpdateSpy.args[0][0], `insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)`);
-  const notesUpdate = exporterUpdateSpy.args[0][1];
-  t.is(notesUpdate[':sfld'], front);
-  t.is(notesUpdate[':flds'], front + separator + back);
-  t.is(notesUpdate[':mid'], topModelId);
+  t.is(exporterUpdateSpy.args[ 0 ][ 0 ], `insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)`);
+  const notesUpdate = exporterUpdateSpy.args[ 0 ][ 1 ];
+  t.is(notesUpdate[ ':sfld' ], front);
+  t.is(notesUpdate[ ':flds' ], front + separator + back);
+  t.is(notesUpdate[ ':mid' ], topModelId);
 
-  t.is(exporterUpdateSpy.args[1][0], `insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
-  const cardsUpdate = exporterUpdateSpy.args[1][1];
-  t.is(cardsUpdate[':did'], topDeckId);
-  t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
+  t.is(exporterUpdateSpy.args[ 1 ][ 0 ], `insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
+  const cardsUpdate = exporterUpdateSpy.args[ 1 ][ 1 ];
+  t.is(cardsUpdate[ ':did' ], topDeckId);
+  t.is(cardsUpdate[ ':nid' ], notesUpdate[ ':id' ], 'should link both tables via the same note_id');
 });

@@ -3,13 +3,13 @@ import test from 'ava';
 import 'babel-register';
 import 'babel-polyfill';
 
-import AnkiExport, {SEPARATOR} from '../src/index';
+import AnkiExport, { SEPARATOR } from '../src/index';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
-import {exec} from  'child_process';
+import { exec } from  'child_process';
 import pify from 'pify';
-import {addCards, unzipDeckToDir} from './_helpers';
+import { addCards, unzipDeckToDir } from './_helpers';
 import sql from 'sql.js';
 
 const template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');

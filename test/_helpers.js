@@ -13,7 +13,7 @@ export const unzipDeckToDir = (pathToDeck, pathToUnzipTo) => {
   return zip
     .loadAsync(zipContent, { createFolders: true })
     .then(() => Promise.all(Object.keys(zip.files).map(i => {
-      const file = zip.files[i];
+      const file = zip.files[ i ];
       const filePath = path.join(pathToUnzipTo, file.name);
       return file
         .async('nodebuffer')
