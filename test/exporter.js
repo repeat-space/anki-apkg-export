@@ -7,8 +7,6 @@ import proxyquire from 'proxyquire';
 import 'babel-register';
 import 'babel-polyfill';
 
-import { checksum } from '../src/helpers';
-
 // Mock Exporter dependencies
 const Exporter = proxyquire('../src/exporter', {
   jszip: function() {
@@ -65,6 +63,13 @@ test('Exporter.save', t => {
   t.truthy(['blob', 'nodebuffer'].includes(zipGenerateAsyncSpy.args[0][0].type), 'zip generates binary file');
 });
 
+test('Exporter.checksum', t => {
+  const { exporter } = t.context;
+
+  t.is(typeof exporter.checksum, 'function', 'should be a function');
+  t.is(exporter.checksum('some string'), 2336613565, 'san calculate checksume for `some string`');
+});
+
 test('Exporter.addCard', t => {
   const { exporter } = t.context;
 
@@ -82,7 +87,7 @@ test('Exporter.addCard', t => {
   t.is(notesUpdate[':sfld'], front);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
-  t.is(notesUpdate[':csum'], checksum(front + separator + back));
+  t.is(notesUpdate[':csum'], exporter.checksum(front + separator + back));
 
   t.is(exporterUpdateSpy.args[1][0],`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
   const cardsUpdate = exporterUpdateSpy.args[1][1];

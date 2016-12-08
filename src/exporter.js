@@ -1,6 +1,7 @@
+const sha1 = require('sha1');
+
 import {
   rand,
-  checksum,
   getLastItem
 } from './helpers';
 
@@ -29,6 +30,8 @@ export default class {
       .updateInitialDeck()
       .updateInitialModelWith();
   }
+
+  checksum(str) { return parseInt(sha1(str).substr(0, 8), 16); }
 
   save(options) {
     const { zip, db, media } = this;
@@ -72,7 +75,7 @@ export default class {
       ':tags': '', // text not null,
       ':flds': front + separator + back, // text not null,
       ':sfld': front, // integer not null,
-      ':csum': checksum(front + separator + back), //integer not null,
+      ':csum': this.checksum(front + separator + back), //integer not null,
       ':flags': 0, // integer not null,
       ':data': '' // text not null,
     });

@@ -3,15 +3,9 @@ import test from 'ava';
 import 'babel-register';
 import 'babel-polyfill';
 import {
-  checksum,
   getLastItem,
   rand
 } from '../src/helpers';
-
-test('checksum', t => {
-  t.is(typeof checksum, 'function', 'should be a function');
-  t.is(checksum('some string'), 2336613565, 'san calculate checksume for `some string`');
-});
 
 test('getLastItem', t => {
   t.is(typeof getLastItem, 'function', 'should be a function');
