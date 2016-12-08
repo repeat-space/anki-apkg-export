@@ -127,10 +127,6 @@ export default class {
   _getFirstVal(query) {
     return JSON.parse(this.db.exec(query)[0].values[0]);
   }
-
-  _getDb() {
-
-  }
 }
 
 export const SEPARATOR = '\u001F';
