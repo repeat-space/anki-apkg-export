@@ -19,7 +19,7 @@ export default class {
       text-align: center;
       color: black;
     }`;
-    
+
     this.db.run(template);
     const decks = this._getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
@@ -36,8 +36,6 @@ export default class {
     model.id = topModelId;
     models[ `${topModelId}` ] = model;
     this._update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
-
-    return this;
   }
 
   save(options) {
@@ -110,7 +108,6 @@ export default class {
 
   _update(query, obj) {
     this.db.prepare(query).getAsObject(obj);
-    return this;
   }
 
   _getInitialRowValue(table, column = 'id') {
