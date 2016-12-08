@@ -1,19 +1,5 @@
 const sha1 = require('sha1');
 
-import {
-  rand,
-  getLastItem
-} from './helpers';
-
-export const SEPARATOR = '\u001F';
-
-export const css = `.card {
-    font-family: arial;
-    font-size: 20px;
-    text-align: center;
-    color: black;
-  }`;
-
 export default class {
   constructor(deckName) {
     this.deckName = deckName;
@@ -26,12 +12,10 @@ export default class {
     this.css = css;
 
     return this
-      .dbRun(this.getTemplate())
-      .updateInitialDeck()
-      .updateInitialModelWith();
+      ._dbRun(this._getTemplate())
+      ._updateInitialDeck()
+      ._updateInitialModelWith();
   }
-
-  checksum(str) { return parseInt(sha1(str).substr(0, 8), 16); }
 
   save(options) {
     const { zip, db, media } = this;
@@ -57,16 +41,11 @@ export default class {
     this.media.push({filename, data});
   }
 
-  update(query, obj) {
-    this.db.prepare(query).getAsObject(obj);
-    return this;
-  }
-
   addCard(front, back) {
     const { topDeckId, topModelId, separator } = this;
     const note_id = rand();
 
-    this.update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
+    this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
       ':guid': rand().toString(36), // rand(10**10).to_s(36) // text not null,
       ':mid': topModelId, // integer not null,
@@ -75,12 +54,12 @@ export default class {
       ':tags': '', // text not null,
       ':flds': front + separator + back, // text not null,
       ':sfld': front, // integer not null,
-      ':csum': this.checksum(front + separator + back), //integer not null,
+      ':csum': this._checksum(front + separator + back), //integer not null,
       ':flags': 0, // integer not null,
       ':data': '' // text not null,
     });
 
-    return this.update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
+    return this._update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
       ':id': rand(), // integer primary key,
       ':nid': note_id, // integer not null,
       ':did': topDeckId, // integer not null,
@@ -102,24 +81,41 @@ export default class {
     });
   }
 
-  getInitialRowValue(table, column = 'id') {
+  _checksum(str) { return parseInt(sha1(str).substr(0, 8), 16); }
+
+  _update(query, obj) {
+    this.db.prepare(query).getAsObject(obj);
+    return this;
+  }
+
+  _getInitialRowValue(table, column = 'id') {
     const query = `select ${column} from ${table}`;
     return this._getFirstVal(query);
   }
 
-  updateInitialModelWith() {
+  _updateInitialModelWith() {
     const id = this.topModelId;
-    const models = this.getInitialRowValue('col', 'models');
+    const models = this._getInitialRowValue('col', 'models');
     const model = getLastItem(models);
     model.name = this.deckName;
     model.css = this.css;
     model.did = this.topDeckId;
     model.id = id;
     models[id + ''] = model;
-    return this.update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
+    return this._update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   }
 
-  getTemplate() {
+  _updateInitialDeck() {
+    const { topDeckId } = this;
+    const decks = this._getInitialRowValue('col', 'decks');
+    const deck = getLastItem(decks);
+    deck.name = this.deckName;
+    deck.id = topDeckId;
+    decks[topDeckId + ''] = deck;
+    return this._update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
+  }
+
+  _getTemplate() {
     let template;
     if (process.env.APP_ENV === 'browser') {
       require('script!sql.js');
@@ -128,16 +124,6 @@ export default class {
       template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
     }
     return template;
-  }
-
-  updateInitialDeck() {
-    const { topDeckId } = this;
-    const decks = this.getInitialRowValue('col', 'decks');
-    const deck = getLastItem(decks);
-    deck.name = this.deckName;
-    deck.id = topDeckId;
-    decks[topDeckId + ''] = deck;
-    return this.update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
   }
 
   _getFirstVal(query) {
@@ -160,8 +146,29 @@ export default class {
     return new Zip(...args);
   }
 
-  dbRun(...args) {
+  _dbRun(...args) {
     this.db.run(...args);
     return this;
   }
 }
+
+export const SEPARATOR = '\u001F';
+
+export const css = `.card {
+    font-family: arial;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+  }`;
+
+export const rand = () => Math.random() * 100000000 | 0;
+
+export const getLastItem = obj => {
+  const keys = Object.keys(obj);
+  const lastKey = keys[keys.length - 1];
+
+  const item = obj[lastKey];
+  delete obj[lastKey];
+
+  return item;
+};

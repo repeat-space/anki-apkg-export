@@ -7,6 +7,7 @@ import proxyquire from 'proxyquire';
 import 'babel-register';
 import 'babel-polyfill';
 
+import { getLastItem, rand } from '../src/exporter';
 // Mock Exporter dependencies
 const Exporter = proxyquire('../src/exporter', {
   jszip: function() {
@@ -63,11 +64,11 @@ test('Exporter.save', t => {
   t.truthy(['blob', 'nodebuffer'].includes(zipGenerateAsyncSpy.args[0][0].type), 'zip generates binary file');
 });
 
-test('Exporter.checksum', t => {
+test('Exporter._checksum', t => {
   const { exporter } = t.context;
 
-  t.is(typeof exporter.checksum, 'function', 'should be a function');
-  t.is(exporter.checksum('some string'), 2336613565, 'san calculate checksume for `some string`');
+  t.is(typeof exporter._checksum, 'function', 'should be a function');
+  t.is(exporter._checksum('some string'), 2336613565, 'san calculate checksume for `some string`');
 });
 
 test('Exporter.addCard', t => {
@@ -76,7 +77,7 @@ test('Exporter.addCard', t => {
   t.is(typeof exporter.addCard, 'function', 'should be a function');
   const { topDeckId, topModelId, separator } = exporter;
   const [front, back] = [5, 9, '!separator!', 'Test Front', 'Test back'];
-  const exporterUpdateSpy = sinon.spy(exporter, 'update');
+  const exporterUpdateSpy = sinon.spy(exporter, '_update');
 
   exporter.addCard(front, back);
 
@@ -87,7 +88,7 @@ test('Exporter.addCard', t => {
   t.is(notesUpdate[':sfld'], front);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
-  t.is(notesUpdate[':csum'], exporter.checksum(front + separator + back));
+  t.is(notesUpdate[':csum'], exporter._checksum(front + separator + back));
 
   t.is(exporterUpdateSpy.args[1][0],`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
   const cardsUpdate = exporterUpdateSpy.args[1][1];
@@ -95,16 +96,16 @@ test('Exporter.addCard', t => {
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
 });
 
-test('Exporter.getTemplate', t => {
+test('Exporter._getTemplate', t => {
   const { exporter } = t.context;
 
-  t.is(typeof exporter.getTemplate, 'function', 'should be a function');
+  t.is(typeof exporter._getTemplate, 'function', 'should be a function');
   let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
-  t.is(exporter.getTemplate(), template, 'should return correct template');
+  t.is(exporter._getTemplate(), template, 'should return correct template');
 });
 
 
-test('getZip', t => {
+test('Exporter._getZip', t => {
   const { exporter } = t.context;
 
   t.is(typeof exporter._getZip, 'function', 'should be a function');
@@ -113,4 +114,20 @@ test('getZip', t => {
   t.truthy(typeof zip === 'object' && !!zip, 'should be an object');
   t.is(typeof zip.file, 'function', 'zip should contains file method');
   t.is(typeof zip.generateAsync, 'function', 'zip should contains generateAsync method');
+});
+
+test('rand', t => {
+  t.is(typeof rand, 'function', 'should be a function');
+  t.is(typeof rand(), 'number', 'should return a number');
+});
+
+test('getLastItem', t => {
+  t.is(typeof getLastItem, 'function', 'should be a function');
+  t.is(getLastItem({ a: 0, b: 1 }), 1, 'get value of last object key');
+
+  // next item is not valuable test, it just explain current behavior
+  // it's strange for me, but you should know
+  const obj = { a: 0, b: 1 };
+  getLastItem(obj);
+  t.deepEqual(obj, { a: 0 }, 'mutate passed param and remove extracted key');
 });
