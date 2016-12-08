@@ -19,8 +19,7 @@ export default class {
       text-align: center;
       color: black;
     }`;
-
-
+    
     this.db.run(template);
     const decks = this._getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
