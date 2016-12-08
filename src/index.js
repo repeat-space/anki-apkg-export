@@ -23,6 +23,6 @@ if (isBrowser) {
 export default function (deckName) {
   return new Exporter(deckName, {
     template,
-    DbClass: sql.Database
+    sql
   });
 }

@@ -23,7 +23,7 @@ test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name', {
     template,
-    DbClass: sql.Database
+    sql
   });
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));

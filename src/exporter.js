@@ -2,12 +2,12 @@ import sha1 from 'sha1';
 import Zip from 'jszip';
 
 export default class {
-  constructor(deckName, { template, DbClass }) {
+  constructor(deckName, { template, sql }) {
     const topDeckId = rand();
     const topModelId = rand();
 
     this.deckName = deckName;
-    this.db = new DbClass();
+    this.db = new sql.Database();
     this.zip = new Zip();
     this.media = [];
     this.topDeckId = topDeckId;

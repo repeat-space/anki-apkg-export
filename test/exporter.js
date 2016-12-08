@@ -19,7 +19,7 @@ const Exporter = proxyquire('../src/exporter', {
 test.beforeEach(t => {
   t.context.exporter = new Exporter('testDeckName', {
     template,
-    DbClass: sql.Database
+    sql
   });
 });
 
