@@ -14,9 +14,9 @@ export const css = `.card {
   }`;
 
 export default class {
-  constructor(deckName, db, zip) {
+  constructor(deckName, zip) {
     this.deckName = deckName;
-    this.db = db;
+    this.db = this._getDb();
     this.zip = zip;
     this.media = [];
     this.topDeckId = rand();
@@ -139,6 +139,17 @@ export default class {
 
   _getFirstVal(query) {
     return JSON.parse(this.db.exec(query)[0].values[0]);
+  }
+
+  _getDb() {
+    let sql;
+    if (process.env.APP_ENV === 'browser') {
+      require('script!sql.js');
+      sql = window.SQL;
+    } else {
+      sql = require('sql.js');
+    }
+    return new sql.Database();
   }
 
   dbRun(...args) {

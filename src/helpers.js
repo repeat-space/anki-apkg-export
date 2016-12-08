@@ -25,8 +25,6 @@ export const getSql = () => {
 
 export const rand = () => Math.random() * 100000000 | 0;
 
-export const getDb = () => new (getSql().Database)();
-
 export const getZip = (...args) => {
   const Zip = require('jszip');
   return new Zip(...args);

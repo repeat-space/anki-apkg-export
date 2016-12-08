@@ -4,9 +4,7 @@ import 'babel-register';
 import 'babel-polyfill';
 import {
   checksum,
-  getDb,
   getLastItem,
-  getSql,
   getZip,
   rand
 } from '../src/helpers';
@@ -27,33 +25,9 @@ test('getLastItem', t => {
   t.deepEqual(obj, { a: 0 }, 'mutate passed param and remove extracted key');
 });
 
-// test('getTemplate', t => {
-//   t.is(typeof getTemplate, 'function', 'should be a function');
-//   let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
-//   t.is(getTemplate(), template, 'should return correct template');
-// });
-
-test('getSql', t => {
-  t.is(typeof getSql, 'function', 'should be a function');
-
-  const sql = getSql();
-  t.truthy(typeof sql === 'object' && !!sql, 'should be an object');
-  t.is(typeof sql.Database, 'function', 'should contains Database constructor');
-});
-
 test('rand', t => {
   t.is(typeof rand, 'function', 'should be a function');
   t.is(typeof rand(), 'number', 'should return a number');
-});
-
-test('getDb', t => {
-  t.is(typeof getDb, 'function', 'should be a function');
-
-  const db = getDb();
-  t.truthy(typeof db === 'object' && !!db, 'should be an object');
-  t.is(typeof db.run, 'function', 'db should contains run method');
-  t.is(typeof db.exec, 'function', 'db should contains run method');
-  t.is(typeof db.export, 'function', 'db should contains run method');
 });
 
 test('getZip', t => {

@@ -1,14 +1,16 @@
 import test from 'ava';
 import sinon from 'sinon';
+import fs from 'fs';
+import path from 'path';
 
 import 'babel-register';
 import 'babel-polyfill';
 
 import Exporter from '../src/exporter';
-import { checksum, getDb } from '../src/helpers';
+import { checksum } from '../src/helpers';
 
 test.beforeEach(t => {
-  t.context.exporter = new Exporter('testDeckName', getDb(), {
+  t.context.exporter = new Exporter('testDeckName', {
     file: () => null,
     generateAsync: () => null
   });
@@ -73,4 +75,12 @@ test('Exporter.addCard', t => {
   const cardsUpdate = exporterUpdateSpy.args[1][1];
   t.is(cardsUpdate[':did'], topDeckId);
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
+});
+
+test('Exporter.getTemplate', t => {
+  const { exporter } = t.context;
+
+  t.is(typeof exporter.getTemplate, 'function', 'should be a function');
+  let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
+  t.is(exporter.getTemplate(), template, 'should return correct template');
 });
