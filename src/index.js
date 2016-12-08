@@ -19,11 +19,10 @@ if (isBrowser) {
 
   template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 }
-const db = new sql.Database();
 
 export default function (deckName) {
   return new Exporter(deckName, {
-    db,
-    template
+    template,
+    DbClass: sql.Database
   });
 }

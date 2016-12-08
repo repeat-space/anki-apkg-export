@@ -23,7 +23,7 @@ test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name', {
     template,
-    db: new sql.Database()
+    DbClass: sql.Database
   });
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
@@ -42,7 +42,7 @@ test('check internal structure', async t => {
   // Create deck as in previous example
   const apkg = new AnkiExport('deck-name', {
     template,
-    db: new sql.Database()
+    DbClass: sql.Database
   });
   const cards = [
     { front: 'card #1 front', back: 'card #1 back' },
