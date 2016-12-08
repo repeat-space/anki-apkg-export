@@ -7,8 +7,6 @@ import sql from 'sql.js';
 import 'babel-register';
 import 'babel-polyfill';
 
-
-
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 // Mock Exporter dependencies
 const Exporter = proxyquire('../src/exporter', {
@@ -31,8 +29,8 @@ test('Exporter.save', t => {
   const zipFileSpy = sinon.spy(exporter.zip, 'file');
   const zipGenerateAsyncSpy = sinon.spy(exporter.zip, 'generateAsync');
 
-  exporter.media = [{filename: '1.jpg'}, {filename: '2.bmp'}];
-  exporter.save({some: 'options', should: { be: 'here'}});
+  exporter.media = [{ filename: '1.jpg' }, { filename: '2.bmp' }];
+  exporter.save({ some: 'options', should: { be: 'here' } });
 
   t.truthy(dbExportSpy.called, 'should call .export on db');
   t.truthy(zipFileSpy.calledWithMatch('collection.anki2'), 'should save notes/cards db');
@@ -60,7 +58,7 @@ test('Exporter.addCard', t => {
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
 
-  t.is(exporterUpdateSpy.args[1][0],`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
+  t.is(exporterUpdateSpy.args[1][0], `insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
   const cardsUpdate = exporterUpdateSpy.args[1][1];
   t.is(cardsUpdate[':did'], topDeckId);
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');

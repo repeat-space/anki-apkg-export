@@ -58,12 +58,16 @@ export default class {
     if (process.env.APP_ENV === 'browser') {
       return zip.generateAsync(Object.assign({}, { type: 'blob' }, options));
     } else {
-      return zip.generateAsync(Object.assign({}, { type: 'nodebuffer', base64: false, compression: 'DEFLATE' }, options));
+      return zip.generateAsync(Object.assign({}, {
+        type: 'nodebuffer',
+        base64: false,
+        compression: 'DEFLATE'
+      }, options));
     }
   }
 
   addMedia(filename, data) {
-    this.media.push({filename, data});
+    this.media.push({ filename, data });
   }
 
   addCard(front, back) {

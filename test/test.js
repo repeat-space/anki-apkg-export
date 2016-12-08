@@ -3,13 +3,13 @@ import test from 'ava';
 import 'babel-register';
 import 'babel-polyfill';
 
-import AnkiExport, { SEPARATOR } from '../src/index';
+import AnkiExport, {SEPARATOR} from '../src/index';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
-import { exec } from  'child_process';
+import {exec} from  'child_process';
 import pify from 'pify';
-import { addCards, unzipDeckToDir } from './_helpers';
+import {addCards, unzipDeckToDir} from './_helpers';
 import sql from 'sql.js';
 
 const template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
@@ -18,7 +18,7 @@ const dest = tmpDir + 'result.apkg';
 const destUnpacked = tmpDir + 'unpacked_result';
 const destUnpackedDb = destUnpacked + '/collection.anki2';
 
-test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
+test.beforeEach(async() => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
   const apkg = new AnkiExport('deck-name', {
@@ -65,7 +65,7 @@ test('check internal structure', async t => {
   db.close();
 
   // compare content from just created db with original list of cards
-  const normilizedResult = sortBy(result.map(({front, back}) => ({
+  const normilizedResult = sortBy(result.map(({ front, back }) => ({
     front,
     back: back.split(SEPARATOR).pop()
   })), 'front');
