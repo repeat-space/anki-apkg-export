@@ -13,8 +13,3 @@ export const getLastItem = obj => {
 };
 
 export const rand = () => Math.random() * 100000000 | 0;
-
-export const getZip = (...args) => {
-  const Zip = require('jszip');
-  return new Zip(...args);
-};

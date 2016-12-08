@@ -5,7 +5,6 @@ import 'babel-polyfill';
 import {
   checksum,
   getLastItem,
-  getZip,
   rand
 } from '../src/helpers';
 
@@ -28,13 +27,4 @@ test('getLastItem', t => {
 test('rand', t => {
   t.is(typeof rand, 'function', 'should be a function');
   t.is(typeof rand(), 'number', 'should return a number');
-});
-
-test('getZip', t => {
-  t.is(typeof getZip, 'function', 'should be a function');
-
-  const zip = getZip();
-  t.truthy(typeof zip === 'object' && !!zip, 'should be an object');
-  t.is(typeof zip.file, 'function', 'zip should contains file method');
-  t.is(typeof zip.generateAsync, 'function', 'zip should contains generateAsync method');
 });

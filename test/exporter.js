@@ -2,18 +2,31 @@ import test from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
 import path from 'path';
+import proxyquire from 'proxyquire';
 
 import 'babel-register';
 import 'babel-polyfill';
 
-import Exporter from '../src/exporter';
 import { checksum } from '../src/helpers';
 
+// Mock Exporter dependencies
+const Exporter = proxyquire('../src/exporter', {
+  jszip: function() {
+    this.file = () => null;
+    this.generateAsync = () => null;
+  },
+  sql: {
+    Database: function() {
+      this.export = () => "data";
+      this.prepare = () => ({getAsObject: () => null });
+      this.run = () => null;
+      this.exec = () => null;
+      }
+    }
+}).default;
+
 test.beforeEach(t => {
-  t.context.exporter = new Exporter('testDeckName', {
-    file: () => null,
-    generateAsync: () => null
-  });
+  t.context.exporter = new Exporter('testDeckName');
 });
 
 test('Exporter class exists', t => {
@@ -83,4 +96,16 @@ test('Exporter.getTemplate', t => {
   t.is(typeof exporter.getTemplate, 'function', 'should be a function');
   let template = fs.readFileSync(path.join(__dirname, '../templates/template.sql'), 'utf-8');
   t.is(exporter.getTemplate(), template, 'should return correct template');
+});
+
+
+test('getZip', t => {
+  const { exporter } = t.context;
+
+  t.is(typeof exporter._getZip, 'function', 'should be a function');
+
+  const zip = exporter._getZip();
+  t.truthy(typeof zip === 'object' && !!zip, 'should be an object');
+  t.is(typeof zip.file, 'function', 'zip should contains file method');
+  t.is(typeof zip.generateAsync, 'function', 'zip should contains generateAsync method');
 });

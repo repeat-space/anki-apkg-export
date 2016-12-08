@@ -9,7 +9,6 @@
     "sql.js": "^0.3.2"
   },
   "devDependencies": {
-    "sinon": "^1.17.6",
     "ava": "^0.17.0",
     "babel-cli": "~6.6.0",
     "babel-eslint": "^6.0.0",
@@ -21,6 +20,8 @@
     "lodash.sortby": "4.7.0",
     "mkdirp": "0.5.1",
     "pify": "2.3.0",
+    "proxyquire": "1.7.10",
+    "sinon": "^1.17.6",
     "sqlite3": "3.1.8"
   },
   "author": "ewnd9 <ewndnine@gmail.com>",

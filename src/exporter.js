@@ -14,10 +14,10 @@ export const css = `.card {
   }`;
 
 export default class {
-  constructor(deckName, zip) {
+  constructor(deckName) {
     this.deckName = deckName;
     this.db = this._getDb();
-    this.zip = zip;
+    this.zip = this._getZip();
     this.media = [];
     this.topDeckId = rand();
     this.topModelId = rand();
@@ -150,6 +150,11 @@ export default class {
       sql = require('sql.js');
     }
     return new sql.Database();
+  }
+
+  _getZip(...args) {
+    const Zip = require('jszip');
+    return new Zip(...args);
   }
 
   dbRun(...args) {
