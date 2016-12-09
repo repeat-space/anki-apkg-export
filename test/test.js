@@ -42,7 +42,7 @@ test('check internal structure', async t => {
   // Create deck as in previous example
   const apkg = new AnkiExport('deck-name', {
     template,
-    DbClass: sql.Database
+    sql: sql.Database
   });
   const cards = [
     { front: 'card #1 front', back: 'card #1 back' },
