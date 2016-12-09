@@ -3,12 +3,10 @@
 import Exporter from './exporter';
 export { SEPARATOR } from './exporter';
 
-const isBrowser = process.env.APP_ENV === 'browser';
-
 let sql;
 let template;
 
-if (isBrowser) {
+if (process.env.APP_ENV === 'browser') {
   require('script!sql.js');
   sql = window.SQL;
 
