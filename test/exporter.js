@@ -8,7 +8,7 @@ import 'babel-register';
 import 'babel-polyfill';
 
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
-// Mock Exporter dependencies
+
 const Exporter = proxyquire('../src/exporter', {
   jszip: function () {
     this.file = () => null;
