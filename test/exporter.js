@@ -67,7 +67,7 @@ test('Exporter.addCard', t => {
 test('Exporter.addCard with options (tags is array)', t => {
   const { exporter } = t.context;
 
-  const { topDeckId, topModelId, separator } = exporter;
+  const { topModelId, separator } = exporter;
   const [front, back] = [ 'Test Front', 'Test back' ];
   const tags = ['tag1', 'tag2', 'multiple words tag'];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
@@ -83,20 +83,11 @@ test('Exporter.addCard with options (tags is array)', t => {
   t.is(notesUpdate[ ':flds' ], front + separator + back);
   t.is(notesUpdate[ ':mid' ], topModelId);
 
-  t.is(notesTags.length, tags.length);
-  t.is(notesTags[0], tags[0]);
-  t.is(notesTags[1], tags[1]);
-  t.is(notesTags[2].replace(/\W/g, '_'), tags[2].replace(/\W/g, '_'), 'Not the same but similar tag for multiwords');
-
-  t.is(exporterUpdateSpy.args[ 1 ][ 0 ], `insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
-  const cardsUpdate = exporterUpdateSpy.args[ 1 ][ 1 ];
-  t.is(cardsUpdate[ ':did' ], topDeckId);
-  t.is(cardsUpdate[ ':nid' ], notesUpdate[ ':id' ], 'should link both tables via the same note_id');
+  t.deepEqual(notesTags, tags.map(i => i.replace(/ /g, '_')));
 });
 
 test('Exporter.addCard with options (tags is string)', t => {
   const { exporter } = t.context;
-
   const { topDeckId, topModelId, separator } = exporter;
   const [front, back, tags] = [ 'Test Front', 'Test back', 'Some string with_delimiters' ];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
