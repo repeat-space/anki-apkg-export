@@ -74,7 +74,7 @@ export default class {
     if (typeof tags === 'string'){
       strTags = tags;
     } else if (tags instanceof Array) {
-      strTags = tagsToStr(tags);
+      strTags = this._tagsToStr(tags);
     }
 
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
@@ -129,11 +129,11 @@ export default class {
   _getFirstVal(query) {
     return JSON.parse(this.db.exec(query)[ 0 ].values[ 0 ]);
   }
+
+  _tagsToStr(tags=[]){
+    return tags.map(i => i.replace(/ /g, '_')).join(' ');
+  }
 }
-
-export const SPACE_REPLACER = String.fromCharCode(160);
-
-export const tagsToStr = (tags=[]) => tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ');
 
 export const SEPARATOR = '_';
 

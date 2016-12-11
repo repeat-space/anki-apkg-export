@@ -4,7 +4,6 @@ import 'babel-register';
 import 'babel-polyfill';
 
 import AnkiExport, { SEPARATOR } from '../src/index';
-import { tagsToStr } from '../src/exporter';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
@@ -93,7 +92,7 @@ test('check internal structure on adding card with tags', async t => {
   t.deepEqual(result1, { 
     front: front1,
     back: `${front1}${SEPARATOR}${back1}`,
-    tags: tagsToStr(tags1)
+    tags: 'some tag tags_with_multiple_words'
   });
   t.deepEqual(result2, { 
     front: front2,
