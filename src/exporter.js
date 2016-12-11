@@ -66,9 +66,8 @@ export default class {
     this.media.push({ filename, data });
   }
 
-  addCard(front, back, options = {}) {
+  addCard(front, back, { tags=[] } = {}) {
     const { topDeckId, topModelId, separator } = this;
-    const { tags=[] } = options; 
     const note_id = rand();
 
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
