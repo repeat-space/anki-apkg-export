@@ -73,7 +73,7 @@ export default class {
     let strTags = '';
     if (typeof tags === 'string'){
       strTags = tags;
-    } else if (tags instanceof Array) {
+    } else if (Array.isArray(tags)) {
       strTags = this._tagsToStr(tags);
     }
 
