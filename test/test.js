@@ -4,6 +4,7 @@ import 'babel-register';
 import 'babel-polyfill';
 
 import AnkiExport, { SEPARATOR } from '../src/index';
+import { SPACE_REPLACER } from '../src/exporter';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
@@ -63,4 +64,30 @@ test('check internal structure', async t => {
   })), 'front');
 
   t.deepEqual(normilizedResult, cards);
+});
+
+test('check internal structure on adding card with tags', async t => {
+  const decFile = `${dest}_with_tags`;
+  const unzipedDeck = `${destUnpacked}_with_tags`;
+  const apkg = new AnkiExport('deck-name');
+  const [front, back, tags] = ['Card front side', 'Card back side', ['some', 'tag', 'tags with multiple words']];
+  apkg.addCard(front, back, { tags });
+  const zip = await apkg.save();
+  fs.writeFileSync(decFile, zip, 'binary');
+
+  await unzipDeckToDir(decFile, unzipedDeck);
+  const db = new sqlite3.Database(`${unzipedDeck}/collection.anki2`);
+  const [ result ] = await pify(db.all.bind(db))(
+    `SELECT
+      notes.sfld as front,
+      notes.flds as back,
+      notes.tags as tags
+      from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`);
+  db.close();
+
+  t.deepEqual(result, { 
+    front,
+    back: `${front}${SEPARATOR}${back}`,
+    tags: tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ')
+  });
 });
