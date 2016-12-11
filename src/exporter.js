@@ -131,7 +131,7 @@ export default class {
   }
 
   _tagsToStr(tags=[]){
-    return tags.map(i => i.replace(/ /g, '_')).join(' ');
+    return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
   }
 }
 

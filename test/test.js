@@ -90,7 +90,7 @@ test('check internal structure on adding card with tags', async t => {
   db.close();
 
   t.deepEqual(results, [
-    { front: front1, back: `${front1}${SEPARATOR}${back1}`, tags: tags1.map(i => i.replace(/ /g, '_')).join(' ') },
+    { front: front1, back: `${front1}${SEPARATOR}${back1}`, tags: tags1.map(tag => tag.replace(/ /g, '_')).join(' ') },
     { front: front2, back: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
     { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: "" }
   ]);
