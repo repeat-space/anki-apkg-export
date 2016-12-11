@@ -66,9 +66,16 @@ export default class {
     this.media.push({ filename, data });
   }
 
-  addCard(front, back) {
+  addCard(front, back, { tags } = {}) {
     const { topDeckId, topModelId, separator } = this;
     const note_id = rand();
+
+    let strTags = '';
+    if (typeof tags === 'string'){
+      strTags = tags;
+    } else if (Array.isArray(tags)) {
+      strTags = this._tagsToStr(tags);
+    }
 
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
@@ -76,7 +83,7 @@ export default class {
       ':mid': topModelId, // integer not null,
       ':mod': new Date().getTime() / 1000 | 0, // integer not null,
       ':usn': -1, // integer not null,
-      ':tags': '', // text not null,
+      ':tags': strTags, // text not null,
       ':flds': front + separator + back, // text not null,
       ':sfld': front, // integer not null,
       ':csum': this._checksum(front + separator + back), //integer not null,
@@ -121,6 +128,10 @@ export default class {
 
   _getFirstVal(query) {
     return JSON.parse(this.db.exec(query)[ 0 ].values[ 0 ]);
+  }
+
+  _tagsToStr(tags=[]){
+    return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
   }
 }
 

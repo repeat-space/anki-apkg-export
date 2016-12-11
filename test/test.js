@@ -64,3 +64,34 @@ test('check internal structure', async t => {
 
   t.deepEqual(normilizedResult, cards);
 });
+
+test('check internal structure on adding card with tags', async t => {
+  const decFile = `${dest}_with_tags.apkg`;
+  const unzipedDeck = `${destUnpacked}_with_tags`;
+  const apkg = new AnkiExport('deck-name');
+  const [front1, back1, tags1] = ['Card front side 1', 'Card back side 1', ['some', 'tag', 'tags with multiple words']];
+  const [front2, back2, tags2] = ['Card front side 2', 'Card back side 2', 'some strin_tags'];
+  const [front3, back3] = ['Card front side 3', 'Card back side 3'];
+  apkg.addCard(front1, back1, { tags: tags1 });
+  apkg.addCard(front2, back2, { tags: tags2 });
+  apkg.addCard(front3, back3);
+
+  const zip = await apkg.save();
+  fs.writeFileSync(decFile, zip, 'binary');
+
+  await unzipDeckToDir(decFile, unzipedDeck);
+  const db = new sqlite3.Database(`${unzipedDeck}/collection.anki2`);
+  const results = await pify(db.all.bind(db))(
+    `SELECT
+      notes.sfld as front,
+      notes.flds as back,
+      notes.tags as tags
+      from cards JOIN notes where cards.nid = notes.id ORDER BY front`);
+  db.close();
+
+  t.deepEqual(results, [
+    { front: front1, back: `${front1}${SEPARATOR}${back1}`, tags: tags1.map(tag => tag.replace(/ /g, '_')).join(' ') },
+    { front: front2, back: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
+    { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: "" }
+  ]);
+});
