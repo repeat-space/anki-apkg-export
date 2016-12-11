@@ -66,9 +66,12 @@ export default class {
     this.media.push({ filename, data });
   }
 
-  addCard(front, back) {
+  addCard(front, back, options = {}) {
     const { topDeckId, topModelId, separator } = this;
+    const { tags=[] } = options; 
     const note_id = rand();
+
+    const strTags = tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ');
 
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
@@ -76,7 +79,7 @@ export default class {
       ':mid': topModelId, // integer not null,
       ':mod': new Date().getTime() / 1000 | 0, // integer not null,
       ':usn': -1, // integer not null,
-      ':tags': '', // text not null,
+      ':tags': strTags, // text not null,
       ':flds': front + separator + back, // text not null,
       ':sfld': front, // integer not null,
       ':csum': this._checksum(front + separator + back), //integer not null,
@@ -123,6 +126,8 @@ export default class {
     return JSON.parse(this.db.exec(query)[ 0 ].values[ 0 ]);
   }
 }
+
+export const SPACE_REPLACER = String.fromCharCode(160);
 
 export const SEPARATOR = '\u001F';
 

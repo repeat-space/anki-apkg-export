@@ -63,3 +63,33 @@ test('Exporter.addCard', t => {
   t.is(cardsUpdate[ ':did' ], topDeckId);
   t.is(cardsUpdate[ ':nid' ], notesUpdate[ ':id' ], 'should link both tables via the same note_id');
 });
+
+test('Exporter.addCard with options (tags)', t => {
+  const { exporter } = t.context;
+
+  const { topDeckId, topModelId, separator } = exporter;
+  const [front, back] = [ 'Test Front', 'Test back' ];
+  const tags = ['tag1', 'tag2', 'multiple words tag'];
+  const exporterUpdateSpy = sinon.spy(exporter, '_update');
+
+  exporter.addCard(front, back, { tags });
+
+  t.is(exporterUpdateSpy.callCount, 2, 'should made two requests');
+
+  t.is(exporterUpdateSpy.args[ 0 ][ 0 ], `insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)`);
+  const notesUpdate = exporterUpdateSpy.args[ 0 ][ 1 ];
+  const notesTags = notesUpdate[ ':tags' ].split(' ');
+  t.is(notesUpdate[ ':sfld' ], front);
+  t.is(notesUpdate[ ':flds' ], front + separator + back);
+  t.is(notesUpdate[ ':mid' ], topModelId);
+
+  t.is(notesTags.length, tags.length);
+  t.is(notesTags[0], tags[0]);
+  t.is(notesTags[1], tags[1]);
+  t.is(notesTags[2].replace(/\W/g, '_'), tags[2].replace(/\W/g, '_'), 'Not the same but similar tag for multiwords');
+
+  t.is(exporterUpdateSpy.args[ 1 ][ 0 ], `insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`);
+  const cardsUpdate = exporterUpdateSpy.args[ 1 ][ 1 ];
+  t.is(cardsUpdate[ ':did' ], topDeckId);
+  t.is(cardsUpdate[ ':nid' ], notesUpdate[ ':id' ], 'should link both tables via the same note_id');
+});
