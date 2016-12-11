@@ -81,7 +81,7 @@ test('check internal structure on adding card with tags', async t => {
 
   await unzipDeckToDir(decFile, unzipedDeck);
   const db = new sqlite3.Database(`${unzipedDeck}/collection.anki2`);
-  const [ result1, result2, result3 ] = await pify(db.all.bind(db))(
+  const results = await pify(db.all.bind(db))(
     `SELECT
       notes.sfld as front,
       notes.flds as back,
@@ -89,19 +89,9 @@ test('check internal structure on adding card with tags', async t => {
       from cards JOIN notes where cards.nid = notes.id ORDER BY front`);
   db.close();
 
-  t.deepEqual(result1, { 
-    front: front1,
-    back: `${front1}${SEPARATOR}${back1}`,
-    tags: tags1.map(i => i.replace(/ /g, '_')).join(' ')
-  });
-  t.deepEqual(result2, { 
-    front: front2,
-    back: `${front2}${SEPARATOR}${back2}`,
-    tags: tags2
-  });
-  t.deepEqual(result3, { 
-    front: front3,
-    back: `${front3}${SEPARATOR}${back3}`,
-    tags: ""
-  });
+  t.deepEqual(results, [
+    { front: front1, back: `${front1}${SEPARATOR}${back1}`, tags: tags1.map(i => i.replace(/ /g, '_')).join(' ') },
+    { front: front2, back: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
+    { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: "" }
+  ]);
 });
