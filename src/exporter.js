@@ -135,7 +135,7 @@ export default class {
   }
 }
 
-export const SEPARATOR = '_';
+export const SEPARATOR = '\u001F';
 
 export const rand = () => Math.random() * 100000000 | 0;
 
