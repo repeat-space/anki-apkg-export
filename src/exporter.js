@@ -135,7 +135,7 @@ export const SPACE_REPLACER = String.fromCharCode(160);
 
 export const tagsToStr = (tags=[]) => tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ');
 
-export const SEPARATOR = '\u001F';
+export const SEPARATOR = '_';
 
 export const rand = () => Math.random() * 100000000 | 0;
 
