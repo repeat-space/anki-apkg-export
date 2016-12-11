@@ -4,7 +4,7 @@ import 'babel-register';
 import 'babel-polyfill';
 
 import AnkiExport, { SEPARATOR } from '../src/index';
-import { SPACE_REPLACER } from '../src/exporter';
+import { tagsToStr } from '../src/exporter';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
@@ -88,6 +88,6 @@ test('check internal structure on adding card with tags', async t => {
   t.deepEqual(result, { 
     front,
     back: `${front}${SEPARATOR}${back}`,
-    tags: tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ')
+    tags: tagsToStr(tags)
   });
 });

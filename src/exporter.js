@@ -71,15 +71,13 @@ export default class {
     const { tags=[] } = options; 
     const note_id = rand();
 
-    const strTags = tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ');
-
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
       ':guid': rand().toString(36), // rand(10**10).to_s(36) // text not null,
       ':mid': topModelId, // integer not null,
       ':mod': new Date().getTime() / 1000 | 0, // integer not null,
       ':usn': -1, // integer not null,
-      ':tags': strTags, // text not null,
+      ':tags': tagsToStr(tags), // text not null,
       ':flds': front + separator + back, // text not null,
       ':sfld': front, // integer not null,
       ':csum': this._checksum(front + separator + back), //integer not null,
@@ -128,6 +126,8 @@ export default class {
 }
 
 export const SPACE_REPLACER = String.fromCharCode(160);
+
+export const tagsToStr = (tags=[]) => tags.map(i => i.replace(/ /g, SPACE_REPLACER)).join(' ');
 
 export const SEPARATOR = '\u001F';
 
