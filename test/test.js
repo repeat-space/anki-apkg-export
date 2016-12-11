@@ -92,7 +92,7 @@ test('check internal structure on adding card with tags', async t => {
   t.deepEqual(result1, { 
     front: front1,
     back: `${front1}${SEPARATOR}${back1}`,
-    tags: 'some tag tags_with_multiple_words'
+    tags: tags1.map(i => i.replace(/ /g, '_')).join(' ')
   });
   t.deepEqual(result2, { 
     front: front2,
