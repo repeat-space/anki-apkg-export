@@ -25,7 +25,7 @@ const apkg = new AnkiExport('deck-name');
 apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
 
 apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back');
+apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
 apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
 apkg
@@ -86,7 +86,8 @@ const apkg = new AnkiExport('deck-name');
 apkg.addMedia('anki.png', file);
 
 apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back');
+apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
+apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
 apkg
   .save()
@@ -103,6 +104,12 @@ apkg
 - [browser from above](examples/browser)
 - [browser usage with media attachments via ajax](examples/browser-media-ajax)
 - [browser usage with media attachments via <form />](examples/browser-media-file-input)
+
+## Changelog
+
+- `v3.0.0` - add tags, ES6 refactor (breaking)
+- `v2.0.0` - add media support, update jszip dependency (breaking)
+- `v1.0.0` - initial rewrite
 
 ## Related
 
