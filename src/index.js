@@ -1,7 +1,6 @@
 'use strict';
 
 import Exporter from './exporter';
-export { SEPARATOR } from './exporter';
 
 let sql;
 let template;

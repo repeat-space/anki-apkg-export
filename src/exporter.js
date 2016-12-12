@@ -12,7 +12,7 @@ export default class {
     this.media = [];
     this.topDeckId = topDeckId;
     this.topModelId = topModelId;
-    this.separator = SEPARATOR;
+    this.separator =  '\u001F';
     this.css = `.card {
       font-family: arial;
       font-size: 20px;
@@ -134,8 +134,6 @@ export default class {
     return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
   }
 }
-
-export const SEPARATOR = '\u001F';
 
 export const rand = () => Math.random() * 100000000 | 0;
 
