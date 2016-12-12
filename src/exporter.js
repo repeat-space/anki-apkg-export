@@ -12,7 +12,7 @@ export default class {
     this.media = [];
     this.topDeckId = topDeckId;
     this.topModelId = topModelId;
-    this.separator = this._getSeparator();
+    this.separator =  '\u001F';
     this.css = `.card {
       font-family: arial;
       font-size: 20px;
@@ -132,10 +132,6 @@ export default class {
 
   _tagsToStr(tags=[]){
     return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
-  }
-
-  _getSeparator() {
-    return '\u001F';
   }
 }
 
