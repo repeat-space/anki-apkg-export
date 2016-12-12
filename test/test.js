@@ -3,7 +3,7 @@ import test from 'ava';
 import 'babel-register';
 import 'babel-polyfill';
 
-import AnkiExport, { SEPARATOR } from '../src/index';
+import AnkiExport from '../src/index';
 import fs from 'fs';
 import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
@@ -15,6 +15,7 @@ const tmpDir = '/tmp/';
 const dest = tmpDir + 'result.apkg';
 const destUnpacked = tmpDir + 'unpacked_result';
 const destUnpackedDb = destUnpacked + '/collection.anki2';
+const SEPARATOR = '\u001F';
 
 test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
