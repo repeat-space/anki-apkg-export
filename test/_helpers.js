@@ -20,3 +20,8 @@ export const unzipDeckToDir = (pathToDeck, pathToUnzipTo) => {
                             .then(data => fs.writeFileSync(filePath, data));
                     })));
 };
+
+export const getRandStub = () => {
+    let i = 1;
+    return () => i++;
+};

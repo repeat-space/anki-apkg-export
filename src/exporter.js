@@ -1,5 +1,6 @@
 import sha1 from 'sha1';
 import Zip from 'jszip';
+import rand from './rand';
 
 export default class {
   constructor(deckName, { template, sql }) {
@@ -134,8 +135,6 @@ export default class {
     return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
   }
 }
-
-export const rand = () => Math.random() * 100000000 | 0;
 
 export const getLastItem = obj => {
   const keys = Object.keys(obj);
