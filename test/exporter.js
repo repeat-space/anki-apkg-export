@@ -7,16 +7,21 @@ import sql from 'sql.js';
 import 'babel-register';
 import 'babel-polyfill';
 
+import { getRandStub } from './_helpers';
+
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 
-const Exporter = proxyquire('../src/exporter', {
+let Exporter; 
+
+test.beforeEach(t => {
+  Exporter = proxyquire('../src/exporter', {
   jszip: function () {
     this.file = () => null;
     this.generateAsync = () => null;
-  }
+  },
+  rand: getRandStub()
 }).default;
 
-test.beforeEach(t => {
   t.context.exporter = new Exporter('testDeckName', {
     template,
     sql
