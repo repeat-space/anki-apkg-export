@@ -3,11 +3,14 @@ import Zip from 'jszip';
 
 export default class {
   constructor(deckName, { template, sql }) {
-    const topDeckId = rand();
-    const topModelId = rand();
+    this.db = new sql.Database();
+    this.db.run(template);
+
+    const now = Date.now();
+    const topDeckId = this._getId('cards', 'did', now);
+    const topModelId = this._getId('notes', 'mid', now);
 
     this.deckName = deckName;
-    this.db = new sql.Database();
     this.zip = new Zip();
     this.media = [];
     this.topDeckId = topDeckId;
@@ -20,7 +23,6 @@ export default class {
       color: black;
     }`;
 
-    this.db.run(template);
     const decks = this._getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
     deck.name = this.deckName;
@@ -68,7 +70,8 @@ export default class {
 
   addCard(front, back, { tags } = {}) {
     const { topDeckId, topModelId, separator } = this;
-    const note_id = rand();
+    const now = Date.now();
+    const note_id = this._getId('notes', 'id', now);
 
     let strTags = '';
     if (typeof tags === 'string'){
@@ -79,9 +82,9 @@ export default class {
 
     this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
-      ':guid': rand().toString(36), // rand(10**10).to_s(36) // text not null,
+      ':guid': `${this._getId('notes', 'guid', now)}`, // text not null,
       ':mid': topModelId, // integer not null,
-      ':mod': new Date().getTime() / 1000 | 0, // integer not null,
+      ':mod': this._getId('notes', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
       ':tags': strTags, // text not null,
       ':flds': front + separator + back, // text not null,
@@ -92,11 +95,11 @@ export default class {
     });
 
     return this._update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
-      ':id': rand(), // integer primary key,
+      ':id': this._getId('cards', 'id', now), // integer primary key,
       ':nid': note_id, // integer not null,
       ':did': topDeckId, // integer not null,
       ':ord': 0, // integer not null,
-      ':mod': new Date().getTime() / 1000 | 0, // integer not null,
+      ':mod': this._getId('cards', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
       ':type': 0, // integer not null,
       ':queue': 0, // integer not null,
@@ -133,9 +136,22 @@ export default class {
   _tagsToStr(tags=[]){
     return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
   }
-}
 
-export const rand = () => Math.random() * 100000000 | 0;
+  _getId(table, col, ts) {
+    const query = `SELECT ${col} from ${table} WHERE ${col} >= ${ts}`;
+    const queryResult = this.db.exec(query);
+    if (queryResult.length === 0) {
+      return ts;
+    }
+    const [ { values } ] = queryResult;
+    const existingValues = values.map(([colValue]) => +colValue);
+    while (existingValues.indexOf(ts) > -1) {
+      ts++;
+    }
+
+    return ts;
+  }
+}
 
 export const getLastItem = obj => {
   const keys = Object.keys(obj);
