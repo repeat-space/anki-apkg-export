@@ -138,11 +138,8 @@ export default class {
   }
 
   _getId(table, col, ts) {
-    const rowObj = this.db.prepare(`SELECT ${col} from ${table} 
-        WHERE ${col} >= :ts
-        ORDER BY ${col} DESC
-        LIMIT 1`)
-      .getAsObject({ ':ts': ts });
+    const query = `SELECT ${col} from ${table} WHERE ${col} >= :ts ORDER BY ${col} DESC LIMIT 1`;
+    const rowObj = this.db.prepare(query).getAsObject({ ':ts': ts });
 
     return rowObj[col] ? +rowObj[col] + 1 : ts;
   }
