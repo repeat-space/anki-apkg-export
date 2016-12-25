@@ -138,7 +138,7 @@ export default class {
   }
 
   _getId(table, col, ts) {
-    const prepSt = this.db.prepare(`SELECT ${col} from ${table} WHERE ${col} >= :ts LIMIT 1`);
+    const prepSt = this.db.prepare(`SELECT ${col} from ${table} WHERE ${col} = :ts LIMIT 1`);
     const isUniq = ts => !prepSt.get({ ':ts': ts }).length;
     
     while (!isUniq(ts)) {
