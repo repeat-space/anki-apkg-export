@@ -138,14 +138,10 @@ export default class {
   }
 
   _getId(table, col, ts) {
-    const query = `SELECT ${col} from ${table} WHERE ${col} >= ${ts}`;
-    const queryResult = this.db.exec(query);
-    if (queryResult.length === 0) {
-      return ts;
-    }
-    const [ { values } ] = queryResult;
-    const existingValues = values.map(([colValue]) => +colValue);
-    while (existingValues.indexOf(ts) > -1) {
+    const prepSt = this.db.prepare(`SELECT ${col} from ${table} WHERE ${col} >= :ts LIMIT 1`);
+    const isUniq = ts => !prepSt.get({ ':ts': ts }).length;
+    
+    while (!isUniq(ts)) {
       ts++;
     }
 
