@@ -8,6 +8,7 @@ import 'babel-register';
 import 'babel-polyfill';
 
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
+const now = Date.now();
 
 const Exporter = proxyquire('../src/exporter', {
   jszip: function () {
@@ -17,10 +18,18 @@ const Exporter = proxyquire('../src/exporter', {
 }).default;
 
 test.beforeEach(t => {
+  t.context.sandbox = sinon.sandbox.create();
+  t.context.clock = sinon.useFakeTimers(now);
+
   t.context.exporter = new Exporter('testDeckName', {
     template,
     sql
   });
+});
+
+test.afterEach(t => {
+  t.context.sandbox.restore();
+  t.context.clock.restore();
 });
 
 test('Exporter.save', t => {
@@ -107,4 +116,19 @@ test('Exporter.addCard with options (tags is string)', t => {
   const cardsUpdate = exporterUpdateSpy.args[ 1 ][ 1 ];
   t.is(cardsUpdate[ ':did' ], topDeckId);
   t.is(cardsUpdate[ ':nid' ], notesUpdate[ ':id' ], 'should link both tables via the same note_id');
+});
+
+test('Exporter._getId',async t => {
+  const { exporter } = t.context;
+  const numberOfCards = 5;
+  const [front, back] = [ 'Test Front', 'Test back' ];
+  for (let i =0; i < numberOfCards; i++) {
+    exporter.addCard(front, back);
+  }
+
+  const noteIdsResult = exporter.db.exec(`SELECT id from notes`);
+  t.deepEqual(noteIdsResult, [
+    {"columns":["id"],
+    "values": new Array(numberOfCards).fill(0).map((el, index) => [now + index])
+  }], 'It should increment values inserted at the same time');
 });
