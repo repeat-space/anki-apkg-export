@@ -9,7 +9,9 @@ import sortBy from 'lodash.sortby';
 import sqlite3 from 'sqlite3';
 import { exec } from  'child_process';
 import pify from 'pify';
+import sinon from 'sinon';
 import { addCards, unzipDeckToDir } from './_helpers';
+import isArrayBufferEqual from 'arraybuffer-equal';
 
 const tmpDir = '/tmp/';
 const dest = tmpDir + 'result.apkg';
@@ -20,6 +22,12 @@ const SEPARATOR = '\u001F';
 test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
+  // 1482680798652 - datetime for test/fixtures/output.apkg
+  const now = 1482680798652;
+  console.log('Now:', now);
+  const sandbox = sinon.sandbox.create();
+  const clock = sinon.useFakeTimers(now);
+
   const apkg = new AnkiExport('deck-name');
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
@@ -32,6 +40,13 @@ test('equals to sample', async t => {
   fs.writeFileSync(dest, zip, 'binary');
 
   t.truthy(zip instanceof Buffer);
+
+  const sampleZip = fs.readFileSync(`${__dirname}/fixtures/output.apkg`);
+  const destZip = fs.readFileSync(dest);
+  t.truthy(isArrayBufferEqual(destZip.buffer, sampleZip.buffer));
+  
+  sandbox.restore();
+  clock.restore();
 });
 
 test('check internal structure', async t => {
