@@ -138,14 +138,13 @@ export default class {
   }
 
   _getId(table, col, ts) {
-    const prepSt = this.db.prepare(`SELECT ${col} from ${table} WHERE ${col} = :ts LIMIT 1`);
-    const isUniq = ts => !prepSt.get({ ':ts': ts }).length;
-    
-    while (!isUniq(ts)) {
-      ts++;
-    }
+    const rowObj = this.db.prepare(`SELECT ${col} from ${table} 
+        WHERE ${col} >= :ts
+        ORDER BY ${col} DESC
+        LIMIT 1`)
+      .getAsObject({ ':ts': ts });
 
-    return ts;
+    return rowObj[col] ? +rowObj[col] + 1 : ts;
   }
 }
 
