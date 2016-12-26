@@ -22,9 +22,7 @@ const SEPARATOR = '\u001F';
 test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
 
 test('equals to sample', async t => {
-  // 1482680798652 - datetime for test/fixtures/output.apkg
   const now = 1482680798652;
-  console.log('Now:', now);
   const sandbox = sinon.sandbox.create();
   const clock = sinon.useFakeTimers(now);
 
