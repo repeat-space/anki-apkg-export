@@ -15,6 +15,6 @@ apkg
   .save()
   .then(zip => {
     fs.writeFileSync('./output.apkg', zip, 'binary');
-    console.log(`Package has been generated: output.pkg`);
+    console.log(`Package has been generated: output.apkg`);
   })
   .catch(err => console.log(err.stack || err));
