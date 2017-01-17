@@ -30,7 +30,7 @@ test('equals to sample', async t => {
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
 
-  apkg.addCard('card #1 front', 'card #1 back');
+  apkg.addCard('card #1 front', 'card #1 back', { tags: ['food', 'fruit'] });
   apkg.addCard('card #2 front', 'card #2 back');
   apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
