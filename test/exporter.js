@@ -92,7 +92,7 @@ test('Exporter.addCard with options (tags is array)', t => {
   t.is(notesUpdate[ ':flds' ], front + separator + back);
   t.is(notesUpdate[ ':mid' ], topModelId);
 
-  t.deepEqual(notesTags, tags.map(tag => tag.replace(/ /g, '_')));
+  t.deepEqual(notesTags, [''].concat(tags.map(tag => tag.replace(/ /g, '_'))).concat(['']));
 });
 
 test('Exporter.addCard with options (tags is string)', t => {

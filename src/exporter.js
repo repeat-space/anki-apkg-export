@@ -134,7 +134,7 @@ export default class {
   }
 
   _tagsToStr(tags=[]){
-    return tags.map(tag => tag.replace(/ /g, '_')).join(' ');
+    return ' ' + tags.map(tag => tag.replace(/ /g, '_')).join(' ') + ' ';
   }
 
   _getId(table, col, ts) {
