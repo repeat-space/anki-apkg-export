@@ -92,7 +92,6 @@ apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 apkg
   .save()
   .then(zip => {
-    const zip = apkg.save();
     saveAs(zip, 'output.apkg');
   })
   .catch(err => console.log(err.stack || err));
