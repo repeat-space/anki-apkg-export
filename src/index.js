@@ -5,7 +5,7 @@ import Exporter from './exporter';
 let sql;
 let template;
 
-if (process.env.APP_ENV === 'browser') {
+if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
   require('script!sql.js');
   sql = window.SQL;
 
