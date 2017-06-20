@@ -8,12 +8,9 @@ let template;
 if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
   require('script!sql.js');
   sql = window.SQL;
-
-  require('script!sql.js');
   template = require('!raw!./../templates/template.sql');
 } else {
   sql = require('sql.js');
-
   template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 }
 
