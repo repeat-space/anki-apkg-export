@@ -37,11 +37,11 @@ test('equals to sample', async t => {
   const zip = await apkg.save();
   fs.writeFileSync(dest, zip, 'binary');
 
-  t.truthy(zip instanceof Buffer);
+  t.true(zip instanceof Buffer);
 
   const sampleZip = fs.readFileSync(`${__dirname}/fixtures/output.apkg`);
   const destZip = fs.readFileSync(dest);
-  t.truthy(isArrayBufferEqual(destZip.buffer, sampleZip.buffer));
+  t.true(isArrayBufferEqual(destZip.buffer, sampleZip.buffer));
 
   sandbox.restore();
   clock.restore();
