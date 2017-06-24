@@ -58,8 +58,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
-        APP_ENV: JSON.stringify('browser')
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
       },
     })
   ],
@@ -92,7 +91,6 @@ apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 apkg
   .save()
   .then(zip => {
-    const zip = apkg.save();
     saveAs(zip, 'output.apkg');
   })
   .catch(err => console.log(err.stack || err));
@@ -107,6 +105,7 @@ apkg
 
 ## Changelog
 
+- `v3.1.0` - make setting APP_ENV optional
 - `v3.0.0` - add tags, ES6 refactor (breaking)
 - `v2.0.0` - add media support, update jszip dependency (breaking)
 - `v1.0.0` - initial rewrite
