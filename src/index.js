@@ -6,11 +6,11 @@ let sql;
 let template;
 
 if (process.env.APP_ENV === 'browser') {
-  require('script!sql.js');
+  require('script-loader!sql.js');
   sql = window.SQL;
 
   require('script!sql.js');
-  template = require('!raw!./../templates/template.sql');
+  template = require('!raw-loader!./../templates/template.sql');
 } else {
   sql = require('sql.js');
 
