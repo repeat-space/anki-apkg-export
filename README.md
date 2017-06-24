@@ -76,7 +76,7 @@ Required loaders:
 - [`raw-loader`](https://github.com/webpack/raw-loader)
 
 ```js
-import { saveAs } from 'filesaverjs';
+import { saveAs } from 'file-saver';
 import AnkiExport from 'anki-apkg-export';
 
 const apkg = new AnkiExport('deck-name');
