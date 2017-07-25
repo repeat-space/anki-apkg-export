@@ -110,6 +110,10 @@ apkg
 - `v2.0.0` - add media support, update jszip dependency (breaking)
 - `v1.0.0` - initial rewrite
 
+## Tips
+
+- [issue#25](https://github.com/ewnd9/anki-apkg-export/issues/25) - Dealing with `sql.js` memory limits
+
 ## Related
 
 - [apkg format documentation](http://decks.wikia.com/wiki/Anki_APKG_format_documentation)
