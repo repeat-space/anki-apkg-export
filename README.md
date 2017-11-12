@@ -72,7 +72,6 @@ module.exports = {
 Required loaders:
 
 - [`script-loader`](https://github.com/webpack/script-loader)
-- [`raw-loader`](https://github.com/webpack/raw-loader)
 
 ```js
 import { saveAs } from 'file-saver';
