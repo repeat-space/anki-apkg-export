@@ -1,20 +1,20 @@
 import Exporter from './exporter';
+import createTemplate from './template';
 
 let sql;
-let template;
 
 if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
   require('script-loader!sql.js');
   sql = window.SQL;
-  template = require('!raw-loader!./../templates/template.sql');
 } else {
   sql = require('sql.js');
-  template = require('fs').readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 }
+
+export { Exporter };
 
 export default function (deckName) {
   return new Exporter(deckName, {
-    template,
+    template: createTemplate(),
     sql
   });
 }
