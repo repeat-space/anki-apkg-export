@@ -1,7 +1,9 @@
 'use strict';
 
 const fs = require('fs');
-const AnkiExport = require('../../dist/index').default;
+
+// const { default: AnkiExport } = require('anki-apkg-export');
+const { default: AnkiExport } = require('../../dist');
 
 const apkg = new AnkiExport('deck-name-node');
 
