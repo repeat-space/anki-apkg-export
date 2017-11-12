@@ -1,7 +1,6 @@
-export default function createTemplate({
-  questionFormat = '{{Front}}',
-  answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}'
-} = {}) {
+export default function createTemplate(
+  { questionFormat = '{{Front}}', answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}' } = {}
+) {
   const conf = {
     nextPos: 1,
     estTimes: true,
@@ -21,51 +20,58 @@ export default function createTemplate({
   const models = {
     1388596687391: {
       veArs: [],
-      name: "Basic-f15d2",
-      tags: ["Tag"],
+      name: 'Basic-f15d2',
+      tags: ['Tag'],
       did: 1435588830424,
       usn: -1,
-      req: [[0, "all", [0]]],
-      flds: [{
-        name: "Front",
-        media: [],
-        sticky: false,
-        rtl: false,
-        ord: 0,
-        font: "Arial",
-        size: 20
-      }, {
-        name: "Back",
-        media: [],
-        sticky: false,
-        rtl: false,
-        ord: 1,
-        font: "Arial",
-        size: 20
-      }],
+      req: [[0, 'all', [0]]],
+      flds: [
+        {
+          name: 'Front',
+          media: [],
+          sticky: false,
+          rtl: false,
+          ord: 0,
+          font: 'Arial',
+          size: 20
+        },
+        {
+          name: 'Back',
+          media: [],
+          sticky: false,
+          rtl: false,
+          ord: 1,
+          font: 'Arial',
+          size: 20
+        }
+      ],
       sortf: 0,
-      latexPre: "\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n",
-      tmpls: [{
-        name: "Card 1",
-        qfmt: questionFormat,
-        did: null,
-        bafmt: "",
-        afmt: answerFormat,
-        ord: 0,
-        bqfmt: ""
-      }],
-      latexPost: "\\end{document}",
+      latexPre:
+        '\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n',
+      tmpls: [
+        {
+          name: 'Card 1',
+          qfmt: questionFormat,
+          did: null,
+          bafmt: '',
+          afmt: answerFormat,
+          ord: 0,
+          bqfmt: ''
+        }
+      ],
+      latexPost: '\\end{document}',
       type: 0,
       id: 1388596687391,
-      css: ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
+      css:
+        '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n',
       mod: 1435645658
     }
   };
 
   const decks = {
     1: {
-      desc: "",
-      name: "Default",
+      desc: '',
+      name: 'Default',
       extendRev: 50,
       usn: 0,
       collapsed: false,
@@ -80,8 +86,8 @@ export default function createTemplate({
       mod: 1435645724
     },
     1435588830424: {
-      desc: "",
-      name: "Template",
+      desc: '',
+      name: 'Template',
       extendRev: 50,
       usn: -1,
       collapsed: false,
@@ -99,7 +105,7 @@ export default function createTemplate({
 
   const dconf = {
     1: {
-      name: "Default",
+      name: 'Default',
       replayq: true,
       lapse: {
         leechFails: 8,
