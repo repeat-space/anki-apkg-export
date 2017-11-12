@@ -1,6 +1,6 @@
 export default function createTemplate({
   questionFormat = '{{Front}}',
-  answerFormat = '{{Back}}'
+  answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}'
 } = {}) {
   const conf = {
     nextPos: 1,
