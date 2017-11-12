@@ -3,23 +3,25 @@ import test from 'ava';
 import 'babel-register';
 import 'babel-polyfill';
 
-import AnkiExport from '../src/index';
 import fs from 'fs';
-import sortBy from 'lodash.sortby';
+import { execFile } from  'child_process';
 import sqlite3 from 'sqlite3';
-import { exec } from  'child_process';
-import pify from 'pify';
-import sinon from 'sinon';
-import { addCards, unzipDeckToDir } from './_helpers';
 import isArrayBufferEqual from 'arraybuffer-equal';
 
-const tmpDir = '/tmp/';
-const dest = tmpDir + 'result.apkg';
-const destUnpacked = tmpDir + 'unpacked_result';
+import pify from 'pify';
+import sinon from 'sinon';
+import sortBy from 'lodash.sortby';
+
+import AnkiExport from '../src';
+import { addCards, unzipDeckToDir } from './_helpers';
+
+const tmpDir = '/tmp';
+const dest = tmpDir + '/result.apkg';
+const destUnpacked = tmpDir + '/unpacked_result';
 const destUnpackedDb = destUnpacked + '/collection.anki2';
 const SEPARATOR = '\u001F';
 
-test.beforeEach(async () => pify(exec)(`rm -rf ${dest} ${destUnpacked}`));
+test.beforeEach(async () => pify(execFile)('rm', ['-rf', dest, destUnpacked]));
 
 test('equals to sample', async t => {
   const now = 1482680798652;

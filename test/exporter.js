@@ -10,12 +10,12 @@ import 'babel-polyfill';
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 const now = Date.now();
 
-const Exporter = proxyquire('../src/exporter', {
+const { Exporter } = proxyquire('../src', {
   jszip: function () {
     this.file = () => null;
     this.generateAsync = () => null;
   }
-}).default;
+});
 
 test.beforeEach(t => {
   t.context.sandbox = sinon.sandbox.create();
