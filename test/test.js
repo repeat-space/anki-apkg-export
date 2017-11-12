@@ -4,7 +4,7 @@ import 'babel-register';
 import 'babel-polyfill';
 
 import fs from 'fs';
-import { execFile } from  'child_process';
+import { execFile } from 'child_process';
 import sqlite3 from 'sqlite3';
 import isArrayBufferEqual from 'arraybuffer-equal';
 
@@ -69,14 +69,18 @@ test('check internal structure', async t => {
     `SELECT
       notes.sfld as front,
       notes.flds as back
-      from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`);
+      from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`
+  );
   db.close();
 
   // compare content from just created db with original list of cards
-  const normilizedResult = sortBy(result.map(({front, back}) => ({
-    front,
-    back: back.split(SEPARATOR).pop()
-  })), 'front');
+  const normilizedResult = sortBy(
+    result.map(({ front, back }) => ({
+      front,
+      back: back.split(SEPARATOR).pop()
+    })),
+    'front'
+  );
 
   t.deepEqual(normilizedResult, cards);
 });
@@ -102,12 +106,17 @@ test('check internal structure on adding card with tags', async t => {
       notes.sfld as front,
       notes.flds as back,
       notes.tags as tags
-      from cards JOIN notes where cards.nid = notes.id ORDER BY front`);
+      from cards JOIN notes where cards.nid = notes.id ORDER BY front`
+  );
   db.close();
 
   t.deepEqual(results, [
-    { front: front1, back: `${front1}${SEPARATOR}${back1}`, tags: ' ' + tags1.map(tag => tag.replace(/ /g, '_')).join(' ') + ' ' },
+    {
+      front: front1,
+      back: `${front1}${SEPARATOR}${back1}`,
+      tags: ' ' + tags1.map(tag => tag.replace(/ /g, '_')).join(' ') + ' '
+    },
     { front: front2, back: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
-    { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: "" }
+    { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: '' }
   ]);
 });

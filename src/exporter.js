@@ -15,7 +15,7 @@ export default class {
     this.media = [];
     this.topDeckId = topDeckId;
     this.topModelId = topModelId;
-    this.separator =  '\u001F';
+    this.separator = '\u001F';
     this.css = `.card {
       font-family: arial;
       font-size: 20px;
@@ -27,7 +27,7 @@ export default class {
     const deck = getLastItem(decks);
     deck.name = this.deckName;
     deck.id = topDeckId;
-    decks[ topDeckId + '' ] = deck;
+    decks[topDeckId + ''] = deck;
     this._update('update col set decks=:decks where id=1', { ':decks': JSON.stringify(decks) });
 
     const models = this._getInitialRowValue('col', 'models');
@@ -36,7 +36,7 @@ export default class {
     model.css = this.css;
     model.did = this.topDeckId;
     model.id = topModelId;
-    models[ `${topModelId}` ] = model;
+    models[`${topModelId}`] = model;
     this._update('update col set models=:models where id=1', { ':models': JSON.stringify(models) });
   }
 
@@ -44,7 +44,7 @@ export default class {
     const { zip, db, media } = this;
     const binaryArray = db.export();
     const mediaObj = media.reduce((prev, curr, idx) => {
-      prev[ idx ] = curr.filename;
+      prev[idx] = curr.filename;
       return prev;
     }, {});
 
@@ -56,11 +56,17 @@ export default class {
     if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
       return zip.generateAsync(Object.assign({}, { type: 'blob' }, options));
     } else {
-      return zip.generateAsync(Object.assign({}, {
-        type: 'nodebuffer',
-        base64: false,
-        compression: 'DEFLATE'
-      }, options));
+      return zip.generateAsync(
+        Object.assign(
+          {},
+          {
+            type: 'nodebuffer',
+            base64: false,
+            compression: 'DEFLATE'
+          },
+          options
+        )
+      );
     }
   }
 
@@ -74,7 +80,7 @@ export default class {
     const note_id = this._getId('notes', 'id', now);
 
     let strTags = '';
-    if (typeof tags === 'string'){
+    if (typeof tags === 'string') {
       strTags = tags;
     } else if (Array.isArray(tags)) {
       strTags = this._tagsToStr(tags);
@@ -94,26 +100,29 @@ export default class {
       ':data': '' // text not null,
     });
 
-    return this._update(`insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)`, {
-      ':id': this._getId('cards', 'id', now), // integer primary key,
-      ':nid': note_id, // integer not null,
-      ':did': topDeckId, // integer not null,
-      ':ord': 0, // integer not null,
-      ':mod': this._getId('cards', 'mod', now), // integer not null,
-      ':usn': -1, // integer not null,
-      ':type': 0, // integer not null,
-      ':queue': 0, // integer not null,
-      ':due': 179, // integer not null,
-      ':ivl': 0, // integer not null,
-      ':factor': 0, // integer not null,
-      ':reps': 0, // integer not null,
-      ':lapses': 0, // integer not null,
-      ':left': 0, // integer not null,
-      ':odue': 0, // integer not null,
-      ':odid': 0, // integer not null,
-      ':flags': 0, // integer not null,
-      ':data': '' // text not null
-    });
+    return this._update(
+      'insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)',
+      {
+        ':id': this._getId('cards', 'id', now), // integer primary key,
+        ':nid': note_id, // integer not null,
+        ':did': topDeckId, // integer not null,
+        ':ord': 0, // integer not null,
+        ':mod': this._getId('cards', 'mod', now), // integer not null,
+        ':usn': -1, // integer not null,
+        ':type': 0, // integer not null,
+        ':queue': 0, // integer not null,
+        ':due': 179, // integer not null,
+        ':ivl': 0, // integer not null,
+        ':factor': 0, // integer not null,
+        ':reps': 0, // integer not null,
+        ':lapses': 0, // integer not null,
+        ':left': 0, // integer not null,
+        ':odue': 0, // integer not null,
+        ':odid': 0, // integer not null,
+        ':flags': 0, // integer not null,
+        ':data': '' // text not null
+      }
+    );
   }
 
   _update(query, obj) {
@@ -130,10 +139,10 @@ export default class {
   }
 
   _getFirstVal(query) {
-    return JSON.parse(this.db.exec(query)[ 0 ].values[ 0 ]);
+    return JSON.parse(this.db.exec(query)[0].values[0]);
   }
 
-  _tagsToStr(tags=[]){
+  _tagsToStr(tags = []) {
     return ' ' + tags.map(tag => tag.replace(/ /g, '_')).join(' ') + ' ';
   }
 
@@ -147,10 +156,10 @@ export default class {
 
 export const getLastItem = obj => {
   const keys = Object.keys(obj);
-  const lastKey = keys[ keys.length - 1 ];
+  const lastKey = keys[keys.length - 1];
 
-  const item = obj[ lastKey ];
-  delete obj[ lastKey ];
+  const item = obj[lastKey];
+  delete obj[lastKey];
 
   return item;
 };
