@@ -1,5 +1,7 @@
 import { saveAs } from 'file-saver';
-import AnkiExport from 'anki-apkg-export';
+
+import AnkiExport from '../../src';
+// import AnkiExport from 'anki-apkg-export';
 
 const apkg = new AnkiExport('deck-name');
 const input = document.getElementById('input');
