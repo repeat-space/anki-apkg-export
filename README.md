@@ -104,6 +104,7 @@ apkg
 
 ## Changelog
 
+- `v4.0.0` - expose template variables (frontside, backside and css)
 - `v3.1.0` - make setting APP_ENV optional
 - `v3.0.0` - add tags, ES6 refactor (breaking)
 - `v2.0.0` - add media support, update jszip dependency (breaking)
