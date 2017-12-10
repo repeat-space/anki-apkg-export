@@ -1,5 +1,9 @@
 export default function createTemplate(
-  { questionFormat = '{{Front}}', answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}' } = {}
+  {
+    questionFormat = '{{Front}}',
+    answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
+    css = '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n'
+  } = {}
 ) {
   const conf = {
     nextPos: 1,
@@ -62,8 +66,7 @@ export default function createTemplate(
       latexPost: '\\end{document}',
       type: 0,
       id: 1388596687391,
-      css:
-        '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n',
+      css,
       mod: 1435645658
     }
   };
