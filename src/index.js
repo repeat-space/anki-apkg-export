@@ -12,9 +12,9 @@ if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
 
 export { Exporter };
 
-export default function(deckName) {
+export default function(deckName, template) {
   return new Exporter(deckName, {
-    template: createTemplate(),
+    template: createTemplate(template),
     sql
   });
 }

@@ -16,12 +16,6 @@ export default class {
     this.topDeckId = topDeckId;
     this.topModelId = topModelId;
     this.separator = '\u001F';
-    this.css = `.card {
-      font-family: arial;
-      font-size: 20px;
-      text-align: center;
-      color: black;
-    }`;
 
     const decks = this._getInitialRowValue('col', 'decks');
     const deck = getLastItem(decks);
@@ -33,7 +27,6 @@ export default class {
     const models = this._getInitialRowValue('col', 'models');
     const model = getLastItem(models);
     model.name = this.deckName;
-    model.css = this.css;
     model.did = this.topDeckId;
     model.id = topModelId;
     models[`${topModelId}`] = model;
