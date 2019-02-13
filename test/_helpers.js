@@ -3,7 +3,7 @@ import path from 'path';
 import Zip from 'jszip';
 import mkdirp from 'mkdirp';
 
-export const addCards = (apkg, list) => list.forEach(({ front, back }) => apkg.addCard(front, back));
+export const addCards = (apkg, list) => list.forEach(({ front, back }) => apkg.addCard([front, back]));
 
 export const unzipDeckToDir = (pathToDeck, pathToUnzipTo) => {
   mkdirp.sync(pathToUnzipTo);

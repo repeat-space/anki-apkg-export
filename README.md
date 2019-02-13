@@ -24,9 +24,9 @@ const apkg = new AnkiExport('deck-name');
 
 apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+apkg.addCard(['card #1 front', 'card #1 back']);
+apkg.addCard(['card #2 front', 'card #2 back'], { tags: ['nice', 'better card'] });
+apkg.addCard(['card #3 with image <img src="anki.png" />', 'card #3 back']);
 
 apkg
   .save()
@@ -83,9 +83,9 @@ const apkg = new AnkiExport('deck-name');
 // take a look at the example folder for a complete overview
 apkg.addMedia('anki.png', file);
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+apkg.addCard(['card #1 front', 'card #1 back']);
+apkg.addCard(['card #2 front', 'card #2 back'], { tags: ['nice', 'better card'] });
+apkg.addCard(['card #3 with image <img src="anki.png" />'], 'card #3 back');
 
 apkg
   .save()

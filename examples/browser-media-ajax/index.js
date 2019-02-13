@@ -15,9 +15,9 @@ fetch('https://raw.githubusercontent.com/ewnd9/anki-apkg-export/39ebdd664ab23b52
   })
   .then(function(myBlob) {
     apkg.addMedia('anki.png', myBlob);
-    apkg.addCard('card #1 with image <img src="anki.png" />', 'card #1 back');
+    apkg.addCard(['card #1 with image <img src="anki.png" />', 'card #1 back']);
 
-    return apkg.save()
+    return apkg.save();
   })
   .then(function(zip) {
     saveAs(zip, 'output.apkg');

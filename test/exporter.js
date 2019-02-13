@@ -57,7 +57,7 @@ test('Exporter.addCard', t => {
   const [front, back] = ['Test Front', 'Test back'];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
 
-  exporter.addCard(front, back);
+  exporter.addCard([front, back]);
 
   t.is(exporterUpdateSpy.callCount, 2, 'should made two requests');
 
@@ -87,7 +87,7 @@ test('Exporter.addCard with options (tags is array)', t => {
   const tags = ['tag1', 'tag2', 'multiple words tag'];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
 
-  exporter.addCard(front, back, { tags });
+  exporter.addCard([front, back], { tags });
 
   t.is(exporterUpdateSpy.callCount, 2, 'should made two requests');
 
@@ -110,7 +110,7 @@ test('Exporter.addCard with options (tags is string)', t => {
   const [front, back, tags] = ['Test Front', 'Test back', 'Some string with_delimiters'];
   const exporterUpdateSpy = sinon.spy(exporter, '_update');
 
-  exporter.addCard(front, back, { tags });
+  exporter.addCard([front, back], { tags });
 
   t.is(exporterUpdateSpy.callCount, 2, 'should made two requests');
 
@@ -138,7 +138,7 @@ test('Exporter._getId', async t => {
   const numberOfCards = 5;
   const [front, back] = ['Test Front', 'Test back'];
   for (let i = 0; i < numberOfCards; i++) {
-    exporter.addCard(front, back);
+    exporter.addCard([front, back]);
   }
 
   const noteIdsResult = exporter.db.exec('SELECT id from notes');
