@@ -14,7 +14,7 @@ input.onchange = function(e) {
     const file = e.target.result;
 
     apkg.addMedia('anki.png', file);
-    apkg.addCard('card #1 with image <img src="anki.png" />', 'card #1 back');
+    apkg.addCard(['card #1 with image <img src="anki.png" />', 'card #1 back']);
 
     apkg
       .save()

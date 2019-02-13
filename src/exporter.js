@@ -46,29 +46,24 @@ export default class {
 
     media.forEach((item, i) => zip.file(i, item.data));
 
-    if (process.env.APP_ENV === 'browser' || typeof window !== 'undefined') {
-      return zip.generateAsync(Object.assign({}, { type: 'blob' }, options));
-    } else {
-      return zip.generateAsync(
-        Object.assign(
-          {},
-          {
+    const baseOptions =
+      process.env.APP_ENV === 'browser' || typeof window !== 'undefined'
+        ? { type: 'blob' }
+        : {
             type: 'nodebuffer',
             base64: false,
             compression: 'DEFLATE'
-          },
-          options
-        )
-      );
-    }
+          };
+    return zip.generateAsync(Object.assign(baseOptions, options));
   }
 
   addMedia(filename, data) {
     this.media.push({ filename, data });
   }
 
-  addCard(front, back, { tags } = {}) {
+  addCard(fields, { tags, sortField } = {}) {
     const { topDeckId, topModelId, separator } = this;
+    const joinedFields = fields.join(separator);
     const now = Date.now();
     const note_id = this._getId('notes', 'id', now);
 
@@ -86,9 +81,9 @@ export default class {
       ':mod': this._getId('notes', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
       ':tags': strTags, // text not null,
-      ':flds': front + separator + back, // text not null,
-      ':sfld': front, // integer not null,
-      ':csum': this._checksum(front + separator + back), //integer not null,
+      ':flds': joinedFields, // text not null,
+      ':sfld': sortField || fields[0], // integer not null,
+      ':csum': this._checksum(joinedFields), //integer not null,
       ':flags': 0, // integer not null,
       ':data': '' // text not null,
     });

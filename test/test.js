@@ -32,9 +32,9 @@ test('equals to sample', async t => {
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
 
-  apkg.addCard('card #1 front', 'card #1 back', { tags: ['food', 'fruit'] });
-  apkg.addCard('card #2 front', 'card #2 back');
-  apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+  apkg.addCard(['card #1 front', 'card #1 back'], { tags: ['food', 'fruit'] });
+  apkg.addCard(['card #2 front', 'card #2 back']);
+  apkg.addCard(['card #3 with image <img src="anki.png" />', 'card #3 back']);
 
   const zip = await apkg.save();
   fs.writeFileSync(dest, zip, 'binary');
@@ -92,9 +92,9 @@ test('check internal structure on adding card with tags', async t => {
   const [front1, back1, tags1] = ['Card front side 1', 'Card back side 1', ['some', 'tag', 'tags with multiple words']];
   const [front2, back2, tags2] = ['Card front side 2', 'Card back side 2', 'some strin_tags'];
   const [front3, back3] = ['Card front side 3', 'Card back side 3'];
-  apkg.addCard(front1, back1, { tags: tags1 });
-  apkg.addCard(front2, back2, { tags: tags2 });
-  apkg.addCard(front3, back3);
+  apkg.addCard([front1, back1], { tags: tags1 });
+  apkg.addCard([front2, back2], { tags: tags2 });
+  apkg.addCard([front3, back3]);
 
   const zip = await apkg.save();
   fs.writeFileSync(decFile, zip, 'binary');
