@@ -22,7 +22,6 @@ test.beforeEach(async () => pify(execFile)('rm', ['-rf', dest, destUnpacked]));
 
 test('equals to sample', async t => {
   const now = 1482680798652;
-  const sandbox = sinon.createSandbox();
   const clock = sinon.useFakeTimers(now);
 
   const apkg = new AnkiExport('deck-name');
@@ -42,7 +41,7 @@ test('equals to sample', async t => {
   const destZip = fs.readFileSync(dest);
   t.true(isArrayBufferEqual(destZip.buffer, sampleZip.buffer));
 
-  sandbox.restore();
+  sinon.restore();
   clock.restore();
 });
 
