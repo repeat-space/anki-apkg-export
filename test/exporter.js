@@ -15,7 +15,6 @@ const { Exporter } = proxyquire('../src', {
 });
 
 test.beforeEach(t => {
-  t.context.sandbox = sinon.createSandbox();
   t.context.clock = sinon.useFakeTimers(now);
 
   t.context.exporter = new Exporter('testDeckName', {
@@ -25,7 +24,7 @@ test.beforeEach(t => {
 });
 
 test.afterEach(t => {
-  t.context.sandbox.restore();
+  sinon.restore();
   t.context.clock.restore();
 });
 
@@ -130,7 +129,7 @@ test('Exporter.addCard with options (tags is string)', t => {
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
 });
 
-test('Exporter._getId', async t => {
+test('Exporter._getId', t => {
   const { exporter } = t.context;
   const numberOfCards = 5;
   const [front, back] = ['Test Front', 'Test back'];
