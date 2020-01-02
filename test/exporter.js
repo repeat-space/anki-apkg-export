@@ -15,7 +15,7 @@ const { Exporter } = proxyquire('../src', {
 });
 
 test.beforeEach(t => {
-  t.context.sandbox = sinon.sandbox.create();
+  t.context.sandbox = sinon.createSandbox();
   t.context.clock = sinon.useFakeTimers(now);
 
   t.context.exporter = new Exporter('testDeckName', {
