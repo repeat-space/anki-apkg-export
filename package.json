@@ -47,7 +47,7 @@
     "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
     "postpublish": "rm -rf dist",
     "precommit": "npm test",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "test": "npm run lint && ava",
     "test:watch": "npm run test -- --watch"
   }
