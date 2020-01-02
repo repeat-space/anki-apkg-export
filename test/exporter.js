@@ -4,9 +4,6 @@ import proxyquire from 'proxyquire';
 import fs from 'fs';
 import sql from 'sql.js';
 
-import 'babel-register';
-import 'babel-polyfill';
-
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 const now = Date.now();
 
