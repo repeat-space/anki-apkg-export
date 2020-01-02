@@ -46,7 +46,6 @@
     "build:watch": "babel -w -d dist src",
     "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
     "postpublish": "rm -rf dist",
-    "precommit": "npm test",
     "prepare": "npm run build",
     "test": "npm run lint && ava",
     "test:watch": "npm run test -- --watch"
