@@ -1,8 +1,5 @@
 import test from 'ava';
 
-import 'babel-register';
-import 'babel-polyfill';
-
 import fs from 'fs';
 import { execFile } from 'child_process';
 import sqlite3 from 'sqlite3';
