@@ -16,8 +16,6 @@ $ yarn add anki-apkg-export
 
 ## Usage
 
-### Node.js
-
 ```js
 const fs = require('fs');
 const initSqlJs = require('sql.js');
@@ -38,38 +36,13 @@ const { default: AnkiExport } = require('anki-apkg-export');
   fs.writeFileSync('./output.apkg', zip, 'binary');
   console.log(`Package has been generated: output.apkg`);
 })();
-
-```
-
-### Browser (Webpack)
-
-[`script-loader`](https://github.com/webpack/script-loader) is required
-
-```js
-import AnkiExport from 'anki-apkg-export';
-import { saveAs } from 'file-saver';
-import 'script-loader!sql.js/dist/sql-asm';
-
-(async () => {
-  const sql = await window.initSqlJs();
-  const apkg = new AnkiExport('deck-name', {}, sql);
-
-  // could be a File from <input /> or a Blob from fetch
-  apkg.addMedia('anki.png', file);
-
-  apkg.addCard('card #1 front', 'card #1 back');
-  apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-  apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
-
-  const zip = await apkg.save()
-  saveAs(zip, 'output.apkg');
-})();
 ```
 
 ## Examples
 
 - [Node.js](examples/server)
-- [Browser (Webpack), with ajax and input media attachments](examples/browser)
+- [Browser/webpack/asm, with ajax and input media attachments](examples/browser)
+- [Browser/webpack/wasm, with ajax and input media attachments](examples/browser)
 
 ## Changelog
 
