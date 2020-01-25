@@ -41,7 +41,7 @@ export default class {
       return prev;
     }, {});
 
-    zip.file('collection.anki2', new Buffer(binaryArray));
+    zip.file('collection.anki2', Buffer.from(binaryArray));
     zip.file('media', JSON.stringify(mediaObj));
 
     media.forEach((item, i) => zip.file(i, item.data));
