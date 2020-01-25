@@ -1,6 +1,6 @@
 # anki-apkg-export
 
-[![Build Status](https://travis-ci.org/ewnd9/anki-apkg-export.svg?branch=master)](https://travis-ci.org/ewnd9/anki-apkg-export)
+[![Build Status](https://travis-ci.org/repeat-space/anki-apkg-export.svg?branch=master)](https://travis-ci.org/repeat-space/anki-apkg-export)
 
 Universal module for generating decks for Anki.
 
