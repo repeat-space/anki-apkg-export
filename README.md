@@ -41,70 +41,35 @@ const { default: AnkiExport } = require('anki-apkg-export');
 
 ```
 
-### Browser
+### Browser (Webpack)
 
-Intended to be used with [`webpack`](https://github.com/webpack/webpack)
-
-```js
-const webpack = require('webpack');
-
-module.exports = {
-  entry: './index.js',
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'babel'
-      },
-    ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
-      },
-    })
-  ],
-  output: {
-    path: __dirname,
-    filename: 'bundle.js'
-  }
-};
-```
-
-Required loaders:
-
-- [`script-loader`](https://github.com/webpack/script-loader)
+[`script-loader`](https://github.com/webpack/script-loader) is required
 
 ```js
-import { saveAs } from 'file-saver';
 import AnkiExport from 'anki-apkg-export';
+import { saveAs } from 'file-saver';
+import 'script-loader!sql.js/dist/sql-asm';
 
-const apkg = new AnkiExport('deck-name');
+(async () => {
+  const sql = await window.initSqlJs();
+  const apkg = new AnkiExport('deck-name', {}, sql);
 
-// could be a File from <input /> or a Blob from fetch
-// take a look at the example folder for a complete overview
-apkg.addMedia('anki.png', file);
+  // could be a File from <input /> or a Blob from fetch
+  apkg.addMedia('anki.png', file);
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+  apkg.addCard('card #1 front', 'card #1 back');
+  apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
+  apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
-apkg
-  .save()
-  .then(zip => {
-    saveAs(zip, 'output.apkg');
-  })
-  .catch(err => console.log(err.stack || err));
+  const zip = await apkg.save()
+  saveAs(zip, 'output.apkg');
+})();
 ```
 
 ## Examples
 
-- [server from above](examples/server)
-- [browser from above](examples/browser)
-- [browser usage with media attachments via ajax](examples/browser-media-ajax)
-- [browser usage with media attachments via <form />](examples/browser-media-file-input)
+- [Node.js](examples/server)
+- [Browser (Webpack), with ajax and input media attachments](examples/browser)
 
 ## Changelog
 
