@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "node server"
+  },
+  "dependencies": {
+    "anki-apkg-export": "file:../../"
+  }
+}

@@ -8,36 +8,40 @@ Port of the Ruby gem https://github.com/albertzak/anki2
 
 ## Install
 
-```
+```sh
 $ npm install anki-apkg-export --save
+# or
+$ yarn add anki-apkg-export
 ```
 
 ## Usage
 
-### server
+### Node.js
 
 ```js
 const fs = require('fs');
-const AnkiExport = require('anki-apkg-export').default;
+const initSqlJs = require('sql.js');
+const { default: AnkiExport } = require('anki-apkg-export');
 
-const apkg = new AnkiExport('deck-name');
+(async () => {
+  const sql = await initSqlJs();
+  const apkg = new AnkiExport('deck-name-node', {}, sql);
 
-apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
+  apkg.addMedia('anki.png', fs.readFileSync('../assets/anki.png'));
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+  apkg.addCard('card #1 front', 'card #1 back');
+  apkg.addCard('card #2 front', 'card #2 back');
+  apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
-apkg
-  .save()
-  .then(zip => {
-    fs.writeFileSync('./output.apkg', zip, 'binary');
-    console.log(`Package has been generated: output.pkg`);
-  })
-  .catch(err => console.log(err.stack || err));
+  const zip = await apkg.save();
+
+  fs.writeFileSync('./output.apkg', zip, 'binary');
+  console.log(`Package has been generated: output.apkg`);
+})();
+
 ```
 
-### browser
+### Browser
 
 Intended to be used with [`webpack`](https://github.com/webpack/webpack)
 
