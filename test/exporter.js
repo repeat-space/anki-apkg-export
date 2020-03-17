@@ -68,7 +68,7 @@ test('Exporter.addCard', t => {
 
   t.is(
     exporterUpdateSpy.args[1][0],
-    'insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)'
+    'insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)'
   );
   const cardsUpdate = exporterUpdateSpy.args[1][1];
   t.is(cardsUpdate[':did'], topDeckId);
@@ -122,9 +122,44 @@ test('Exporter.addCard with options (tags is string)', t => {
 
   t.is(
     exporterUpdateSpy.args[1][0],
-    'insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)'
+    'insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)'
   );
   const cardsUpdate = exporterUpdateSpy.args[1][1];
+  t.is(cardsUpdate[':did'], topDeckId);
+  t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
+});
+
+test('Exporter.addCard updates note if it is a duplicate', t => {
+  const { exporter } = t.context;
+
+  const { topDeckId, topModelId, separator } = exporter;
+  const [front, back] = ['Test Front', 'Test back'];
+  const exporterUpdateSpy = sinon.spy(exporter, '_update');
+
+  exporter.addCard(front, back);
+  exporter.addCard(front, back);
+
+  t.is(exporterUpdateSpy.callCount, 4, 'should made four requests');
+
+  t.is(
+    exporterUpdateSpy.args[0][0],
+    'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
+  );
+  const notesUpdate = exporterUpdateSpy.args[0][1];
+  const secondNotesUpdate = exporterUpdateSpy.args[2][1];
+  t.is(notesUpdate[':id'], secondNotesUpdate[':id']);
+  t.is(notesUpdate[':guid'], secondNotesUpdate[':guid']);
+  t.is(notesUpdate[':sfld'], front);
+  t.is(notesUpdate[':flds'], front + separator + back);
+  t.is(notesUpdate[':mid'], topModelId);
+
+  t.is(
+    exporterUpdateSpy.args[1][0],
+    'insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)'
+  );
+  const cardsUpdate = exporterUpdateSpy.args[1][1];
+  const secondCardsUpdate = exporterUpdateSpy.args[3][1];
+  t.is(cardsUpdate[':id'], secondCardsUpdate[':id']);
   t.is(cardsUpdate[':did'], topDeckId);
   t.is(cardsUpdate[':nid'], notesUpdate[':id'], 'should link both tables via the same note_id');
 });
