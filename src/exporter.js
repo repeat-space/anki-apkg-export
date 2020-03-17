@@ -70,7 +70,8 @@ export default class {
   addCard(front, back, { tags } = {}) {
     const { topDeckId, topModelId, separator } = this;
     const now = Date.now();
-    const note_id = this._getId('notes', 'id', now);
+    const note_guid = this._getNoteGuid(topDeckId, front, back);
+    const note_id = this._getNoteId(note_guid, now);
 
     let strTags = '';
     if (typeof tags === 'string') {
@@ -79,9 +80,9 @@ export default class {
       strTags = this._tagsToStr(tags);
     }
 
-    this._update('insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
+    this._update('insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
-      ':guid': `${this._getId('notes', 'guid', now)}`, // text not null,
+      ':guid': note_guid, // text not null,
       ':mid': topModelId, // integer not null,
       ':mod': this._getId('notes', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
@@ -144,6 +145,17 @@ export default class {
     const rowObj = this.db.prepare(query).getAsObject({ ':ts': ts });
 
     return rowObj[col] ? +rowObj[col] + 1 : ts;
+  }
+
+  _getNoteId(guid, ts) {
+    const query = `SELECT id from notes WHERE guid = :guid ORDER BY id DESC LIMIT 1`;
+    const rowObj = this.db.prepare(query).getAsObject({ ':guid': guid });
+
+    return rowObj.id || this._getId('notes', 'id', ts);
+  }
+
+  _getNoteGuid(topDeckId, front, back) {
+    return sha1(`${topDeckId}${front}${back}`);
   }
 }
 
