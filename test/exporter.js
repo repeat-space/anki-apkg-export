@@ -59,7 +59,7 @@ test('Exporter.addCard', t => {
 
   t.is(
     exporterUpdateSpy.args[0][0],
-    'insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
+    'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
   t.is(notesUpdate[':sfld'], front);
@@ -89,7 +89,7 @@ test('Exporter.addCard with options (tags is array)', t => {
 
   t.is(
     exporterUpdateSpy.args[0][0],
-    'insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
+    'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
   const notesTags = notesUpdate[':tags'].split(' ');
@@ -112,7 +112,7 @@ test('Exporter.addCard with options (tags is string)', t => {
 
   t.is(
     exporterUpdateSpy.args[0][0],
-    'insert into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
+    'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
   t.is(notesUpdate[':sfld'], front);
@@ -134,16 +134,19 @@ test('Exporter._getId', t => {
   const numberOfCards = 5;
   const [front, back] = ['Test Front', 'Test back'];
   for (let i = 0; i < numberOfCards; i++) {
-    exporter.addCard(front, back);
+    exporter.addCard(`${front} ${i}`, `${back} ${i}`);
   }
 
-  const noteIdsResult = exporter.db.exec('SELECT id from notes');
+  const noteIdsResult = exporter.db.exec('SELECT id FROM notes ORDER BY id DESC');
   t.deepEqual(
     noteIdsResult,
     [
       {
         columns: ['id'],
-        values: new Array(numberOfCards).fill(0).map((el, index) => [now + index])
+        values: new Array(numberOfCards)
+          .fill(0)
+          .map((el, index) => [now + index])
+          .sort((a, b) => b[0] - a[0])
       }
     ],
     'It should increment values inserted at the same time'
