@@ -95,9 +95,9 @@ export default class {
     });
 
     return this._update(
-      'insert into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)',
+      'insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)',
       {
-        ':id': this._getId('cards', 'id', now), // integer primary key,
+        ':id': this._getCardId(note_id, now), // integer primary key,
         ':nid': note_id, // integer not null,
         ':did': topDeckId, // integer not null,
         ':ord': 0, // integer not null,
@@ -156,6 +156,13 @@ export default class {
 
   _getNoteGuid(topDeckId, front, back) {
     return sha1(`${topDeckId}${front}${back}`);
+  }
+
+  _getCardId(note_id, ts) {
+    const query = `SELECT id from cards WHERE nid = :note_id ORDER BY id DESC LIMIT 1`;
+    const rowObj = this.db.prepare(query).getAsObject({ ':note_id': note_id });
+
+    return rowObj.id || this._getId('cards', 'id', ts);
   }
 }
 
