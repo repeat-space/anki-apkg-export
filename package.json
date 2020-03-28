@@ -8,6 +8,9 @@
     "sha1": "^1.1.1",
     "sql.js": "^1.1.0"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@babel/cli": "^7.0.0",
     "@babel/core": "^7.0.0",
@@ -36,7 +39,6 @@
     "webpack"
   ],
   "license": "MIT",
-  "preferGlobal": "true",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ewnd9/anki-apkg-export.git"
