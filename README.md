@@ -23,7 +23,11 @@ const { default: AnkiExport } = require('anki-apkg-export');
 
 (async () => {
   const sql = await initSqlJs();
-  const apkg = new AnkiExport('deck-name-node', {}, sql);
+  const apkg = new AnkiExport({
+    deckName: 'deck-name-node',
+    template: {},
+    sql
+  });
 
   apkg.addMedia('anki.png', fs.readFileSync('../assets/anki.png'));
 

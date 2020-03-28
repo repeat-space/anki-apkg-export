@@ -1,8 +1,8 @@
 import sha1 from 'sha1';
 import Zip from 'jszip';
 
-export default class {
-  constructor(deckName, { template, sql }) {
+export class Exporter {
+  constructor({ deckName, template, sql }) {
     this.db = new sql.Database();
     this.db.run(template);
 

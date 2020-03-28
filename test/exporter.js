@@ -17,7 +17,8 @@ const { Exporter } = proxyquire('../src', {
 test.beforeEach(async t => {
   t.context.clock = sinon.useFakeTimers(now);
 
-  t.context.exporter = new Exporter('testDeckName', {
+  t.context.exporter = new Exporter({
+    deckName: 'testDeckName',
     template,
     sql: await initSqlJs()
   });
