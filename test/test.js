@@ -34,7 +34,6 @@ test('equals to sample', async t => {
 
   const zip = await apkg.save();
   fs.writeFileSync(dest, zip, 'binary');
-  fs.writeFileSync(`${__dirname}/fixtures/output.apkg`, zip, 'binary');
 
   t.true(zip instanceof Buffer);
 
