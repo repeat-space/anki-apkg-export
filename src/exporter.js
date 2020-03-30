@@ -7,7 +7,7 @@ export default class {
     this.db.run(template);
 
     const topDeckId = this._getDeckGuid(deckName);
-    const topModelId = `${topDeckId}-model`;
+    const topModelId = topDeckId;
 
     this.deckName = deckName;
     this.zip = new Zip();
@@ -82,7 +82,7 @@ export default class {
     this._update('insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
       ':guid': note_guid, // text not null,
-      ':mid': topModelId, // text not null,
+      ':mid': topModelId, // integer not null,
       ':mod': this._getId('notes', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
       ':tags': strTags, // text not null,
@@ -98,7 +98,7 @@ export default class {
       {
         ':id': this._getCardId(note_id, now), // integer primary key,
         ':nid': note_id, // integer not null,
-        ':did': topDeckId, // text not null,
+        ':did': topDeckId, // integer not null,
         ':ord': 0, // integer not null,
         ':mod': this._getId('cards', 'mod', now), // integer not null,
         ':usn': -1, // integer not null,
@@ -147,7 +147,8 @@ export default class {
   }
 
   _getDeckGuid(deckName) {
-    return sha1(deckName);
+    const hashBytes = sha1(deckName);
+    return parseInt(hashBytes, 16);
   }
 
   _getNoteId(guid, ts) {
