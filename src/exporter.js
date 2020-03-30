@@ -6,9 +6,8 @@ export default class {
     this.db = new sql.Database();
     this.db.run(template);
 
-    const now = Date.now();
-    const topDeckId = this._getId('cards', 'did', now);
-    const topModelId = this._getId('notes', 'mid', now);
+    const topDeckId = this._getDeckGuid(deckName);
+    const topModelId = `${topDeckId}-model`;
 
     this.deckName = deckName;
     this.zip = new Zip();
@@ -70,7 +69,7 @@ export default class {
   addCard(front, back, { tags } = {}) {
     const { topDeckId, topModelId, separator } = this;
     const now = Date.now();
-    const note_guid = this._getNoteGuid(topDeckId, front, back);
+    const note_guid = this._getNoteGuid(topDeckId, front);
     const note_id = this._getNoteId(note_guid, now);
 
     let strTags = '';
@@ -147,6 +146,10 @@ export default class {
     return rowObj[col] ? +rowObj[col] + 1 : ts;
   }
 
+  _getDeckGuid(deckName) {
+    return sha1(deckName);
+  }
+
   _getNoteId(guid, ts) {
     const query = `SELECT id from notes WHERE guid = :guid ORDER BY id DESC LIMIT 1`;
     const rowObj = this.db.prepare(query).getAsObject({ ':guid': guid });
@@ -154,8 +157,8 @@ export default class {
     return rowObj.id || this._getId('notes', 'id', ts);
   }
 
-  _getNoteGuid(topDeckId, front, back) {
-    return sha1(`${topDeckId}${front}${back}`);
+  _getNoteGuid(topDeckId, front) {
+    return sha1(`${topDeckId}${front}`);
   }
 
   _getCardId(note_id, ts) {

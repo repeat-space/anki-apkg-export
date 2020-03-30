@@ -24,7 +24,7 @@ export default function createTemplate({
       veArs: [],
       name: 'Basic-f15d2',
       tags: ['Tag'],
-      did: 1435588830424,
+      did: '1435588830424',
       usn: -1,
       req: [[0, 'all', [0]]],
       flds: [
@@ -178,7 +178,7 @@ export default function createTemplate({
     CREATE TABLE notes (
         id              integer primary key,   /* 0 */
         guid            text not null,         /* 1 */
-        mid             integer not null,      /* 2 */
+        mid             text not null,         /* 2 */
         mod             integer not null,      /* 3 */
         usn             integer not null,      /* 4 */
         tags            text not null,         /* 5 */
@@ -191,7 +191,7 @@ export default function createTemplate({
     CREATE TABLE cards (
         id              integer primary key,   /* 0 */
         nid             integer not null,      /* 1 */
-        did             integer not null,      /* 2 */
+        did             text not null,         /* 2 */
         ord             integer not null,      /* 3 */
         mod             integer not null,      /* 4 */
         usn             integer not null,      /* 5 */
