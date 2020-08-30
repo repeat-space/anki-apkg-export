@@ -8,6 +8,7 @@ import isArrayBufferEqual from 'arraybuffer-equal';
 import pify from 'pify';
 import sinon from 'sinon';
 import sortBy from 'lodash.sortby';
+import initSqlJs from 'sql.js';
 
 import AnkiExport from '../src';
 import { addCards, unzipDeckToDir } from './_helpers';
@@ -24,7 +25,12 @@ test('equals to sample', async t => {
   const now = 1482680798652;
   const clock = sinon.useFakeTimers(now);
 
-  const apkg = new AnkiExport('deck-name');
+  const sql = await initSqlJs();
+  const apkg = new AnkiExport({
+    deckName: 'deck-name',
+    template: {},
+    sql
+  });
 
   apkg.addMedia('anki.png', fs.readFileSync(__dirname + '/fixtures/anki.png'));
 
@@ -47,7 +53,12 @@ test('equals to sample', async t => {
 
 test('check internal structure', async t => {
   // Create deck as in previous example
-  const apkg = new AnkiExport('deck-name');
+  const sql = await initSqlJs();
+  const apkg = new AnkiExport({
+    deckName: 'deck-name',
+    template: {},
+    sql
+  });
   const cards = [
     { front: 'card #1 front', back: 'card #1 back' },
     { front: 'card #2 front', back: 'card #2 back' },
@@ -84,7 +95,12 @@ test('check internal structure', async t => {
 test('check internal structure on adding card with tags', async t => {
   const decFile = `${dest}_with_tags.apkg`;
   const unzipedDeck = `${destUnpacked}_with_tags`;
-  const apkg = new AnkiExport('deck-name');
+  const sql = await initSqlJs();
+  const apkg = new AnkiExport({
+    deckName: 'deck-name',
+    template: {},
+    sql
+  });
   const [front1, back1, tags1] = ['Card front side 1', 'Card back side 1', ['some', 'tag', 'tags with multiple words']];
   const [front2, back2, tags2] = ['Card front side 2', 'Card back side 2', 'some strin_tags'];
   const [front3, back3] = ['Card front side 3', 'Card back side 3'];

@@ -1,8 +1,8 @@
 import sha1 from 'sha1';
 import Zip from 'jszip';
 
-export default class {
-  constructor(deckName, { template, sql }) {
+export class Exporter {
+  constructor({ deckName, template, sql }) {
     this.db = new sql.Database();
     this.db.run(template);
 
@@ -41,7 +41,7 @@ export default class {
       return prev;
     }, {});
 
-    zip.file('collection.anki2', new Buffer(binaryArray));
+    zip.file('collection.anki2', Buffer.from(binaryArray));
     zip.file('media', JSON.stringify(mediaObj));
 
     media.forEach((item, i) => zip.file(i, item.data));

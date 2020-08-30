@@ -1,4 +1,4 @@
-export default function createTemplate({
+export function createTemplate({
   questionFormat = '{{Front}}',
   answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
   css = '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n'

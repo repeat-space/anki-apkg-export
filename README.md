@@ -8,99 +8,45 @@ Port of the Ruby gem https://github.com/albertzak/anki2
 
 ## Install
 
-```
+```sh
 $ npm install anki-apkg-export --save
+# or
+$ yarn add anki-apkg-export
 ```
 
 ## Usage
 
-### server
-
 ```js
 const fs = require('fs');
-const AnkiExport = require('anki-apkg-export').default;
+const initSqlJs = require('sql.js');
+const { default: AnkiExport } = require('anki-apkg-export');
 
-const apkg = new AnkiExport('deck-name');
+(async () => {
+  const sql = await initSqlJs();
+  const apkg = new AnkiExport({
+    deckName: 'deck-name-node',
+    template: {},
+    sql
+  });
 
-apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
+  apkg.addMedia('anki.png', fs.readFileSync('../assets/anki.png'));
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+  apkg.addCard('card #1 front', 'card #1 back');
+  apkg.addCard('card #2 front', 'card #2 back');
+  apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
 
-apkg
-  .save()
-  .then(zip => {
-    fs.writeFileSync('./output.apkg', zip, 'binary');
-    console.log(`Package has been generated: output.pkg`);
-  })
-  .catch(err => console.log(err.stack || err));
-```
+  const zip = await apkg.save();
 
-### browser
-
-Intended to be used with [`webpack`](https://github.com/webpack/webpack)
-
-```js
-const webpack = require('webpack');
-
-module.exports = {
-  entry: './index.js',
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'babel'
-      },
-    ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
-      },
-    })
-  ],
-  output: {
-    path: __dirname,
-    filename: 'bundle.js'
-  }
-};
-```
-
-Required loaders:
-
-- [`script-loader`](https://github.com/webpack/script-loader)
-
-```js
-import { saveAs } from 'file-saver';
-import AnkiExport from 'anki-apkg-export';
-
-const apkg = new AnkiExport('deck-name');
-
-// could be a File from <input /> or a Blob from fetch
-// take a look at the example folder for a complete overview
-apkg.addMedia('anki.png', file);
-
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
-
-apkg
-  .save()
-  .then(zip => {
-    saveAs(zip, 'output.apkg');
-  })
-  .catch(err => console.log(err.stack || err));
+  fs.writeFileSync('./output.apkg', zip, 'binary');
+  console.log(`Package has been generated: output.apkg`);
+})();
 ```
 
 ## Examples
 
-- [server from above](examples/server)
-- [browser from above](examples/browser)
-- [browser usage with media attachments via ajax](examples/browser-media-ajax)
-- [browser usage with media attachments via <form />](examples/browser-media-file-input)
+- [Node.js](examples/server)
+- [Browser/webpack/asm, with ajax and input media attachments](examples/browser)
+- [Browser/webpack/wasm, with ajax and input media attachments](examples/browser)
 
 ## Changelog
 

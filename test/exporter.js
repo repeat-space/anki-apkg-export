@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import fs from 'fs';
-import sql from 'sql.js';
+import initSqlJs from 'sql.js';
 
 const template = fs.readFileSync(__dirname + '/../templates/template.sql', 'utf-8');
 const now = Date.now();
@@ -14,12 +14,13 @@ const { Exporter } = proxyquire('../src', {
   }
 });
 
-test.beforeEach(t => {
+test.beforeEach(async t => {
   t.context.clock = sinon.useFakeTimers(now);
 
-  t.context.exporter = new Exporter('testDeckName', {
+  t.context.exporter = new Exporter({
+    deckName: 'testDeckName',
     template,
-    sql
+    sql: await initSqlJs()
   });
 });
 
