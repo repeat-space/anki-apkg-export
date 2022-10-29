@@ -4,7 +4,8 @@
 
 Universal module for generating decks for Anki.
 
-Port of the Ruby gem https://github.com/albertzak/anki2
+This is a fork of https://github.com/repeat-space/anki-apkg-export and rewrote using TypeScript.
+This module supports Deno and browser, not Node.js.
 
 ## Install
 
