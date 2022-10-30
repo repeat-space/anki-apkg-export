@@ -6,4 +6,19 @@ export type {
   SqlValue,
 } from "https://esm.sh/sql.js@1.8.0";
 export { default as JSZip } from "https://esm.sh/jszip@3.10.1";
-export { sha1 } from "https://deno.land/x/sha1@v1.0.3/mod.ts";
+
+interface InputByType {
+  base64: string;
+  string: string;
+  text: string;
+  binarystring: string;
+  array: number[];
+  uint8array: Uint8Array;
+  arraybuffer: ArrayBuffer;
+  blob: Blob;
+  stream: NodeJS.ReadableStream;
+}
+
+export type InputFormats =
+  | InputByType[keyof InputByType]
+  | Promise<InputByType[keyof InputByType]>;

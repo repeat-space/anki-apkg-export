@@ -1,5 +1,12 @@
-import type { BindParams, Database, SqlJsStatic, SqlValue } from "./deps.ts";
-import { JSZip, sha1 } from "./deps.ts";
+import type {
+  BindParams,
+  Database,
+  InputFormats,
+  SqlJsStatic,
+  SqlValue,
+} from "./deps.ts";
+import { JSZip } from "./deps.ts";
+import { checksum, sha1 } from "./hash.ts";
 
 export interface Init {
   template: string;
@@ -8,7 +15,7 @@ export interface Init {
 
 export interface Media {
   filename: string;
-  data: JSZip.InputType;
+  data: InputFormats;
 }
 
 const separator = "\u001F";
@@ -65,17 +72,17 @@ export default class {
     return this.zip.generateAsync({ type: "blob", ...options });
   }
 
-  addMedia(filename: string, data: JSZip.InputType) {
+  addMedia(filename: string, data: InputFormats) {
     this.media.push({ filename, data });
   }
 
-  addCard(
+  async addCard(
     front: string,
     back: string,
     { tags }: { tags?: string | string[] } = {},
   ) {
     const now = Date.now();
-    const note_guid = this._getNoteGuid(this.topDeckId, front, back);
+    const note_guid = await getNoteGuid(this.topDeckId, front, back);
     const note_id = this._getNoteId(note_guid, now);
 
     const strTags = typeof tags === "string"
@@ -95,7 +102,7 @@ export default class {
         ":tags": strTags, // text not null,
         ":flds": front + separator + back, // text not null,
         ":sfld": front, // integer not null,
-        ":csum": this._checksum(front + separator + back), //integer not null,
+        ":csum": await checksum(front + separator + back), //integer not null,
         ":flags": 0, // integer not null,
         ":data": "", // text not null,
       },
@@ -135,11 +142,6 @@ export default class {
     return this._getFirstVal(query);
   }
 
-  private _checksum(str: string) {
-    // @ts-ignore fix later
-    return parseInt(sha1(str).substr(0, 8), 16);
-  }
-
   private _getFirstVal(query: string) {
     const [firstValue] = this.db.exec(query)[0].values[0];
     return typeof firstValue === "string" ? JSON.parse(firstValue) : firstValue;
@@ -165,10 +167,6 @@ export default class {
     return rowObj.id || this._getId("notes", "id", ts);
   }
 
-  private _getNoteGuid(topDeckId: number, front: string, back: string) {
-    return sha1(`${topDeckId}${front}${back}`) as string;
-  }
-
   private _getCardId(note_id: SqlValue, ts: number) {
     const query =
       `SELECT id from cards WHERE nid = :note_id ORDER BY id DESC LIMIT 1`;
@@ -187,3 +185,6 @@ export const getLastItem = (obj: Record<string, unknown>) => {
 
   return item;
 };
+
+const getNoteGuid = (topDeckId: number, front: string, back: string) =>
+  sha1(`${topDeckId}${front}${back}`);
