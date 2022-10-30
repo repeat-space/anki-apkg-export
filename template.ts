@@ -1,13 +1,22 @@
-export default function createTemplate({
-  questionFormat = '{{Front}}',
-  answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
-  css = '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n'
-} = {}) {
+export interface TemplateInit {
+  questionFormat?: string;
+  answerFormat?: string;
+  css?: string;
+}
+
+export const createTemplate = (init?: TemplateInit): string => {
+  const {
+    questionFormat = "{{Front}}",
+    answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
+    css =
+      ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
+  } = init ?? {};
+
   const conf = {
     nextPos: 1,
     estTimes: true,
     activeDecks: [1],
-    sortType: 'noteFld',
+    sortType: "noteFld",
     timeLim: 0,
     sortBackwards: false,
     addToCur: true,
@@ -15,64 +24,64 @@ export default function createTemplate({
     newBury: true,
     newSpread: 0,
     dueCounts: true,
-    curModel: '1435645724216',
-    collapseTime: 1200
+    curModel: "1435645724216",
+    collapseTime: 1200,
   };
 
   const models = {
     1388596687391: {
       veArs: [],
-      name: 'Basic-f15d2',
-      tags: ['Tag'],
+      name: "Basic-f15d2",
+      tags: ["Tag"],
       did: 1435588830424,
       usn: -1,
-      req: [[0, 'all', [0]]],
+      req: [[0, "all", [0]]],
       flds: [
         {
-          name: 'Front',
+          name: "Front",
           media: [],
           sticky: false,
           rtl: false,
           ord: 0,
-          font: 'Arial',
-          size: 20
+          font: "Arial",
+          size: 20,
         },
         {
-          name: 'Back',
+          name: "Back",
           media: [],
           sticky: false,
           rtl: false,
           ord: 1,
-          font: 'Arial',
-          size: 20
-        }
+          font: "Arial",
+          size: 20,
+        },
       ],
       sortf: 0,
       latexPre:
-        '\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n',
+        "\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n",
       tmpls: [
         {
-          name: 'Card 1',
+          name: "Card 1",
           qfmt: questionFormat,
           did: null,
-          bafmt: '',
+          bafmt: "",
           afmt: answerFormat,
           ord: 0,
-          bqfmt: ''
-        }
+          bqfmt: "",
+        },
       ],
-      latexPost: '\\end{document}',
+      latexPost: "\\end{document}",
       type: 0,
       id: 1388596687391,
       css,
-      mod: 1435645658
-    }
+      mod: 1435645658,
+    },
   };
 
   const decks = {
     1: {
-      desc: '',
-      name: 'Default',
+      desc: "",
+      name: "Default",
       extendRev: 50,
       usn: 0,
       collapsed: false,
@@ -84,11 +93,11 @@ export default function createTemplate({
       revToday: [0, 0],
       lrnToday: [0, 0],
       id: 1,
-      mod: 1435645724
+      mod: 1435645724,
     },
     1435588830424: {
-      desc: '',
-      name: 'Template',
+      desc: "",
+      name: "Template",
       extendRev: 50,
       usn: -1,
       collapsed: false,
@@ -100,20 +109,20 @@ export default function createTemplate({
       revToday: [545, 0],
       lrnToday: [545, 0],
       id: 1435588830424,
-      mod: 1435588830
-    }
+      mod: 1435588830,
+    },
   };
 
   const dconf = {
     1: {
-      name: 'Default',
+      name: "Default",
       replayq: true,
       lapse: {
         leechFails: 8,
         minInt: 1,
         delays: [10],
         leechAction: 0,
-        mult: 0
+        mult: 0,
       },
       rev: {
         perDay: 100,
@@ -122,7 +131,7 @@ export default function createTemplate({
         maxIvl: 36500,
         ease4: 1.3,
         bury: true,
-        minSpace: 1
+        minSpace: 1,
       },
       timer: 0,
       maxTaken: 60,
@@ -134,12 +143,12 @@ export default function createTemplate({
         ints: [1, 4, 7],
         initialFactor: 2500,
         bury: true,
-        order: 1
+        order: 1,
       },
       mod: 0,
       id: 1,
-      autoplay: true
-    }
+      autoplay: true,
+    },
   };
 
   return `
@@ -235,4 +244,4 @@ export default function createTemplate({
     CREATE INDEX ix_notes_csum on notes (csum);
     COMMIT;
   `;
-}
+};
