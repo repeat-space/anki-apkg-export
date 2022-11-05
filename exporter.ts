@@ -18,11 +18,16 @@ export interface Media {
   data: InputFormats;
 }
 
+export interface Card {
+  front: string;
+  back: string;
+  tag?: string | string[];
+}
+
 const separator = "\u001F";
 
 export default class {
   private db: Database;
-  private zip = new JSZip();
   private media: Media[] = [];
   private topDeckId: number;
   private topModelId: number;
@@ -36,6 +41,7 @@ export default class {
     this.topModelId = this._getId("notes", "mid", now);
 
     const decks = this._getInitialRowValue("col", "decks");
+    console.log(decks);
     const deck = getLastItem(decks);
     deck.name = this.deckName;
     deck.id = this.topDeckId;
@@ -58,18 +64,19 @@ export default class {
   save(
     options?: Omit<JSZip.JSZipGeneratorOptions<"blob">, "type">,
   ): Promise<Blob> {
-    const binaryArray = this.db.export();
+    const zip = new JSZip();
+
+    zip.file("collection.anki2", this.db.export());
+
     const mediaObj = this.media.reduce((prev, curr, idx) => {
       prev[idx] = curr.filename;
       return prev;
     }, {} as Record<number, string>);
+    zip.file("media", JSON.stringify(mediaObj));
 
-    this.zip.file("collection.anki2", binaryArray);
-    this.zip.file("media", JSON.stringify(mediaObj));
+    this.media.forEach((item, i) => zip.file(`${i}`, item.data));
 
-    this.media.forEach((item, i) => this.zip.file(`${i}`, item.data));
-
-    return this.zip.generateAsync({ type: "blob", ...options });
+    return zip.generateAsync({ type: "blob", ...options });
   }
 
   addMedia(filename: string, data: InputFormats) {
