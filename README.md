@@ -4,10 +4,11 @@
 
 Universal module for generating decks for Anki.
 
-This is a fork of https://github.com/repeat-space/anki-apkg-export and rewrote using TypeScript.
-This module supports Deno and browser, not Node.js.
+This is a fork of https://github.com/repeat-space/anki-apkg-export and rewrote
+using TypeScript. This module supports Deno and browser, not Node.js.
 
-Schema comments in `type.ts` is ported of [Database Structure](https://github.com/ankidroid/Anki-Android/wiki/Database-Structure)
+Schema comments in `type.ts` is ported of
+[Database Structure](https://github.com/ankidroid/Anki-Android/wiki/Database-Structure)
 
 ## Install
 
@@ -20,24 +21,26 @@ $ npm install anki-apkg-export --save
 ### server
 
 ```js
-const fs = require('fs');
-const AnkiExport = require('anki-apkg-export').default;
+const fs = require("fs");
+const AnkiExport = require("anki-apkg-export").default;
 
-const apkg = new AnkiExport('deck-name');
+const apkg = new AnkiExport("deck-name");
 
-apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
+apkg.addMedia("anki.png", fs.readFileSync("anki.png"));
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+apkg.addCard("card #1 front", "card #1 back");
+apkg.addCard("card #2 front", "card #2 back", {
+  tags: ["nice", "better card"],
+});
+apkg.addCard('card #3 with image <img src="anki.png" />', "card #3 back");
 
 apkg
   .save()
-  .then(zip => {
-    fs.writeFileSync('./output.apkg', zip, 'binary');
+  .then((zip) => {
+    fs.writeFileSync("./output.apkg", zip, "binary");
     console.log(`Package has been generated: output.pkg`);
   })
-  .catch(err => console.log(err.stack || err));
+  .catch((err) => console.log(err.stack || err));
 ```
 
 ### browser
@@ -45,30 +48,30 @@ apkg
 Intended to be used with [`webpack`](https://github.com/webpack/webpack)
 
 ```js
-const webpack = require('webpack');
+const webpack = require("webpack");
 
 module.exports = {
-  entry: './index.js',
+  entry: "./index.js",
   module: {
     loaders: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel'
+        loader: "babel",
       },
-    ]
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
+      "process.env": {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV || "development"),
       },
-    })
+    }),
   ],
   output: {
     path: __dirname,
-    filename: 'bundle.js'
-  }
+    filename: "bundle.js",
+  },
 };
 ```
 
@@ -77,25 +80,27 @@ Required loaders:
 - [`script-loader`](https://github.com/webpack/script-loader)
 
 ```js
-import { saveAs } from 'file-saver';
-import AnkiExport from 'anki-apkg-export';
+import { saveAs } from "file-saver";
+import AnkiExport from "anki-apkg-export";
 
-const apkg = new AnkiExport('deck-name');
+const apkg = new AnkiExport("deck-name");
 
 // could be a File from <input /> or a Blob from fetch
 // take a look at the example folder for a complete overview
-apkg.addMedia('anki.png', file);
+apkg.addMedia("anki.png", file);
 
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
+apkg.addCard("card #1 front", "card #1 back");
+apkg.addCard("card #2 front", "card #2 back", {
+  tags: ["nice", "better card"],
+});
+apkg.addCard('card #3 with image <img src="anki.png" />', "card #3 back");
 
 apkg
   .save()
-  .then(zip => {
-    saveAs(zip, 'output.apkg');
+  .then((zip) => {
+    saveAs(zip, "output.apkg");
   })
-  .catch(err => console.log(err.stack || err));
+  .catch((err) => console.log(err.stack || err));
 ```
 
 ## Examples
@@ -115,13 +120,16 @@ apkg
 
 ## Tips
 
-- [issue#25](https://github.com/ewnd9/anki-apkg-export/issues/25) - Dealing with `sql.js` memory limits
+- [issue#25](https://github.com/ewnd9/anki-apkg-export/issues/25) - Dealing with
+  `sql.js` memory limits
 
 ## Related
 
 - [apkg format documentation](http://decks.wikia.com/wiki/Anki_APKG_format_documentation)
-- [anki-apkg-export-cli](https://github.com/ewnd9/anki-apkg-export-cli) - CLI for this module
-- [anki-apkg-export-app](https://github.com/ewnd9/anki-apkg-export-app) - Simple web app to generate cards online
+- [anki-apkg-export-cli](https://github.com/ewnd9/anki-apkg-export-cli) - CLI
+  for this module
+- [anki-apkg-export-app](https://github.com/ewnd9/anki-apkg-export-app) - Simple
+  web app to generate cards online
 
 ## License
 
