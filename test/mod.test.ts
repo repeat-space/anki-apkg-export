@@ -3,7 +3,6 @@ import { initSqlJs } from "../deps.ts";
 import { addCards, unzipDeckToDir } from "./_helpers.ts";
 import {
   afterEach,
-  assert,
   assertEquals,
   beforeEach,
   DB,
