@@ -1,3 +1,4 @@
+import { Conf, DConf, Deck, Model } from "./types.ts";
 export interface TemplateInit {
   questionFormat?: string;
   answerFormat?: string;
@@ -12,7 +13,7 @@ export const createTemplate = (init?: TemplateInit): string => {
       ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
   } = init ?? {};
 
-  const conf = {
+  const conf: Conf = {
     nextPos: 1,
     estTimes: true,
     activeDecks: [1],
@@ -28,9 +29,9 @@ export const createTemplate = (init?: TemplateInit): string => {
     collapseTime: 1200,
   };
 
-  const models = {
+  const models: Record<number, Model> = {
     1388596687391: {
-      veArs: [],
+      vers: [],
       name: "Basic-f15d2",
       tags: ["Tag"],
       did: 1435588830424,
@@ -78,7 +79,7 @@ export const createTemplate = (init?: TemplateInit): string => {
     },
   };
 
-  const decks = {
+  const decks: Record<number, Deck> = {
     1: {
       desc: "",
       name: "Default",
@@ -113,7 +114,7 @@ export const createTemplate = (init?: TemplateInit): string => {
     },
   };
 
-  const dconf = {
+  const dconf: Record<number, DConf> = {
     1: {
       name: "Default",
       replayq: true,

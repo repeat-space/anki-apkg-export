@@ -7,6 +7,8 @@ Universal module for generating decks for Anki.
 This is a fork of https://github.com/repeat-space/anki-apkg-export and rewrote using TypeScript.
 This module supports Deno and browser, not Node.js.
 
+Schema comments in `type.ts` is ported of [Database Structure](https://github.com/ankidroid/Anki-Android/wiki/Database-Structure)
+
 ## Install
 
 ```
