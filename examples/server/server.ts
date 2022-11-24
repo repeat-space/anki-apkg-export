@@ -1,5 +1,6 @@
 import AnkiExport from "../../mod.ts";
 import { initSqlJs } from "../../deps.ts";
+import { JSZip } from "../deps.ts";
 
 const version = "1.8.0";
 const sql = await initSqlJs({
@@ -18,10 +19,21 @@ await apkg.addCard("card #2 front", "card #2 back");
 await apkg.addCard('card #3 with image <img src="anki.png" />', "card #3 back");
 
 try {
-  const zip = await apkg.save();
+  const zip = new JSZip();
+  const { "collection.anki2": collection, media, ...files } = apkg.save();
+  for (const [key, value] of Object.entries(files)) {
+    zip.file(key, value);
+  }
+  zip.file("collection.anki2", collection);
+  zip.file("media", JSON.stringify(media));
+
   await Deno.writeFile(
     "./output.apkg",
-    new Uint8Array(await zip.arrayBuffer()),
+    await zip.generateAsync({
+      type: "uint8array",
+      compression: "DEFLATE",
+      compressionOptions: { level: 9 },
+    }),
   );
   console.log(`Package has been generated: output.apkg`);
 } catch (e: unknown) {

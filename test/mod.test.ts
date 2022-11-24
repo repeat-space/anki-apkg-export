@@ -1,6 +1,6 @@
 import AnkiExport from "../mod.ts";
 import { initSqlJs } from "../deps.ts";
-import { addCards, unzipDeckToDir } from "./_helpers.ts";
+import { addCards } from "./_helpers.ts";
 import {
   afterEach,
   assertEquals,
@@ -11,8 +11,7 @@ import {
 } from "./deps_test.ts";
 
 const tmpDir = "./tmp";
-const destUnpacked = `${tmpDir}/unpacked_result`;
-const destUnpackedDb = `${destUnpacked}/collection.anki2`;
+const destUnpackedDb = `${tmpDir}/collection.anki2`;
 const SEPARATOR = "\u001F";
 const version = "1.8.0";
 const sql = await initSqlJs({
@@ -53,24 +52,15 @@ describe("Anki package", () => {
       new URL("./fixtures/anki.png", import.meta.url),
     );
     apkg.addMedia("anki.png", image);
-    const zip = await apkg.save();
-    const fileName = `${tmpDir}/result.apkg`;
-    await Deno.writeFile(
-      fileName,
-      new Uint8Array(await zip.arrayBuffer()),
-    );
-
-    // extract dec to tmp directory
-    await unzipDeckToDir(fileName, destUnpacked);
+    const apkgData = apkg.save();
 
     // analize media
-    const imageRestored = await Deno.readFile(`${destUnpacked}/0`);
+    const imageRestored = apkgData[0];
     assertEquals(image, imageRestored);
-    assertEquals(JSON.parse(await Deno.readTextFile(`${destUnpacked}/media`)), {
-      "0": "anki.png",
-    });
+    assertEquals(apkgData.media, { 0: "anki.png" });
 
     // analize db via sqlite
+    await Deno.writeFile(destUnpackedDb, apkgData["collection.anki2"]);
     const db = new DB(destUnpackedDb, { mode: "read" });
     const result = db.queryEntries<{ front: string; back: string }>(`SELECT
                                                                     notes.sfld as front,
@@ -88,8 +78,6 @@ describe("Anki package", () => {
   });
 
   it("check internal structure on adding card with tags", async () => {
-    const decFile = `${tmpDir}/result_with_tags.apkg`;
-    const unzipedDeck = `${destUnpacked}_with_tags`;
     const apkg = AnkiExport("deck-name", { sql });
     const [front1, back1, tags1] = ["Card front side 1", "Card back side 1", [
       "some",
@@ -106,14 +94,10 @@ describe("Anki package", () => {
     await apkg.addCard(front2, back2, { tags: tags2 });
     await apkg.addCard(front3, back3);
 
-    const zip = await apkg.save();
-    await Deno.writeFile(
-      decFile,
-      new Uint8Array(await zip.arrayBuffer()),
-    );
+    const apkgData = apkg.save();
 
-    await unzipDeckToDir(decFile, unzipedDeck);
-    const db = new DB(`${unzipedDeck}/collection.anki2`);
+    await Deno.writeFile(destUnpackedDb, apkgData["collection.anki2"]);
+    const db = new DB(destUnpackedDb, { mode: "read" });
     const results = db.queryEntries<
       { front: string; back: string; tags: string }
     >(

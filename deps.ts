@@ -5,7 +5,6 @@ export type {
   SqlJsStatic,
   SqlValue,
 } from "https://esm.sh/sql.js@1.8.0";
-export { default as JSZip } from "https://esm.sh/jszip@3.9.1";
 
 interface InputByType {
   base64: string;

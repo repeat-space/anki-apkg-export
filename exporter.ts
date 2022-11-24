@@ -5,7 +5,6 @@ import type {
   SqlJsStatic,
   SqlValue,
 } from "./deps.ts";
-import { JSZip } from "./deps.ts";
 import { checksum, sha1 } from "./hash.ts";
 import { Card, Deck, Model } from "./types.ts";
 
@@ -31,6 +30,11 @@ export interface TableFieldMap {
 }
 
 const separator = "\u001F";
+
+export type AnkiPkg = {
+  "collection.anki2": Uint8Array;
+  media: Record<number, string>;
+} & Record<number, InputFormats>;
 
 export default class {
   private db: Database;
@@ -62,22 +66,18 @@ export default class {
     this.setModels(models);
   }
 
-  save(
-    options?: Omit<JSZip.JSZipGeneratorOptions<"blob">, "type">,
-  ): Promise<Blob> {
-    const zip = new JSZip();
+  save(): AnkiPkg {
+    const collection = this.db.export();
 
-    zip.file("collection.anki2", this.db.export());
+    const media: Record<number, string> = {};
+    const mediaList: Record<number, InputFormats> = {};
 
-    const mediaObj = this.media.reduce((prev, curr, idx) => {
-      prev[idx] = curr.filename;
-      return prev;
-    }, {} as Record<number, string>);
-    zip.file("media", JSON.stringify(mediaObj));
+    this.media.forEach((item, i) => {
+      media[i] = item.filename;
+      mediaList[i] = item.data;
+    });
 
-    this.media.forEach((item, i) => zip.file(`${i}`, item.data));
-
-    return zip.generateAsync({ type: "blob", ...options });
+    return { "collection.anki2": collection, media, ...mediaList };
   }
 
   addMedia(filename: string, data: InputFormats) {
