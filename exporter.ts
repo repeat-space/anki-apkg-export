@@ -93,12 +93,6 @@ export default class {
     const note_guid = await getNoteGuid(this.topDeckId, front, back);
     const note_id = this._getNoteId(note_guid, now);
 
-    const strTags = typeof tags === "string"
-      ? tags
-      : Array.isArray(tags)
-      ? tagsToStr(tags)
-      : "";
-
     this._update(
       "insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)",
       {
@@ -107,7 +101,7 @@ export default class {
         ":mid": this.topModelId, // integer not null,
         ":mod": this.getId("notes", "mod", now), // integer not null,
         ":usn": -1, // integer not null,
-        ":tags": strTags, // text not null,
+        ":tags": tagToStr(tags), // text not null,
         ":flds": front + separator + back, // text not null,
         ":sfld": front, // integer not null,
         ":csum": await checksum(front + separator + back), //integer not null,
@@ -221,5 +215,9 @@ export const getLastItem = <T>(obj: Record<string, T>): T => {
 const getNoteGuid = (topDeckId: number, front: string, back: string) =>
   sha1(`${topDeckId}${front}${back}`);
 
-const tagsToStr = (tags: string[] = []) =>
-  ` ${tags.map((tag) => tag.replaceAll(" ", "_")).join(" ")} `;
+const tagToStr = (tags?: string | string[]) =>
+  typeof tags === "string"
+    ? tags
+    : Array.isArray(tags)
+    ? ` ${tags.map((tag) => tag.replaceAll(" ", "_")).join(" ")} `
+    : "";
