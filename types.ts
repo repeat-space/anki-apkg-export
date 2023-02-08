@@ -27,10 +27,18 @@ export interface Card {
    */
   usn: number;
 
-  /** 0=new, 1=learning, 2=review, 3=relearning */
+  /** | value | description |
+   * | ----- | ----------- |
+   * | 0 | new |
+   * | 1 | learning |
+   * | 2 | review |
+   * | 3 | relearning |
+   */
   type: 0 | 1 | 2 | 3;
 
-  /** -3=user buried(In scheduler 2),
+  /** | value | description |
+   * | ----- | ----------- |
+   * | -3 | user buried(In scheduler 2) |
    * -2=sched buried (In scheduler 2),
    * -2=buried(In scheduler 1),
    * -1=suspended,
@@ -63,8 +71,8 @@ export interface Card {
 
   /** of the form a*1000+b, with:
    *
-   * a the number of reps left today
-   * b the number of reps left till graduation
+   * - a: the number of reps left today
+   * - b: the number of reps left till graduation
    *
    * for example: '2004' means 2 reps left today and 4 reps till graduation
    */
@@ -82,11 +90,78 @@ export interface Card {
   /** original did: only used when the card is currently in filtered deck */
   odid: number;
 
-  /** This integer mod 8 represents a "flag", which can be see in browser and while reviewing a note. Red 1, Orange 2, Green 3, Blue 4, no flag: 0. This integer divided by 8 represents currently nothing */
+  /** This integer mod 8 represents a "flag", which can be see in browser and while reviewing a note.
+   *
+   * Red 1, Orange 2, Green 3, Blue 4, no flag: 0.
+   *
+   * This integer divided by 8 represents currently nothing
+   */
   flags: number;
 
   /** currently unused */
   data: string;
+}
+
+/** col contains a single row that holds various information about the collection */
+export interface Collection {
+  /** arbitrary number since there is only one row */
+  id: number;
+
+  /** timestamp of the creation date in second.
+   * It's correct up to the day.
+   * For V1 scheduler, the hour corresponds to starting a new day.
+   * By default, new day is 4. */
+  crt: number;
+
+  /** last modified in milliseconds */
+  mod: number;
+
+  /** schema mod time: time when "schema" was modified.
+   *
+   * If server scm is different from the client scm a full-sync is required
+   */
+  scm: number;
+
+  /** version */
+  ver: number;
+
+  /** dirty: unused, set to 0 */
+  dty: 0;
+
+  /** update sequence number: used for finding diffs when syncing.
+   *
+   * See `Card.usn` for more details.
+   */
+  usn: number;
+
+  /** last sync time */
+  ls: number;
+
+  /** configuration options that are synced. */
+  conf: Conf;
+
+  /** the models (aka Note types)
+   *
+   * keys of this object are strings containing integers: "creation time in epoch milliseconds" of the models
+   */
+  models: Record<string, Model>;
+
+  /** the deck(s)
+   *
+   * keys of this object are strings containing integers: "deck creation time in epoch milliseconds" for most decks, "1" for the default deck
+   */
+  decks: Record<string, Deck>;
+
+  /** json object of json object(s) representing the options group(s) for decks
+   *
+   * keys of this object are strings containing integers: "options group creation time in epoch milliseconds" for most groups, "1" for the default option group
+   */
+  dconf: Record<string, DConf>;
+
+  /** a cache of tags used in the collection
+   * (This list is displayed in the browser. Potentially at other place)
+   */
+  tags: string;
 }
 
 /** Notes contain the raw information that is formatted into a number of cards according to the models */
@@ -219,9 +294,11 @@ export interface Conf {
    *
    * Possible values are:
    *
-   * - 0 -- NEW_CARDS_DISTRIBUTE (Mix new cards and reviews)
-   * - 1 -- NEW_CARDS_LAST (see new cards after review)
-   * - 2 -- NEW_CARDS_FIRST (See new card before review)
+   * | value | description |
+   * | ----- | ----------- |
+   * | 0 | NEW_CARDS_DISTRIBUTE (Mix new cards and reviews) |
+   * | 1 | NEW_CARDS_LAST (see new cards after review) |
+   * | 2 | NEW_CARDS_FIRST (See new card before review) |
    */
   newSpread: 0 | 1 | 2;
 
@@ -271,10 +348,13 @@ export interface Conf {
   /** whether the browser sorting must be in increasing or decreasing order */
   sortBackwards: boolean;
 
-  /** True for 'When adding, default to current deck' in Preferences>Basic. False for 'Change deck depending on note type'. */
+  /** `true` for 'When adding, default to current deck' in Preferences>Basic.
+   *
+   * `false` for 'Change deck depending on note type'.
+   */
   addToCur: boolean;
 
-  /** Always set to true and not read anywhere in the code but at the place where it is set to True if it is not already true.
+  /** Always set to `true` and not read anywhere in the code but at the place where it is set to True if it is not already true.
    *
    * Hence probably quite useful. */
   newBury: boolean;
@@ -295,27 +375,45 @@ export interface Conf {
    *
    * Possible values are listed in aqt.browser.Browser.setupColumns. They are:
    *
-   * 'question' -- the browser column'Question',
-   * 'answer' -- the browser column'Answer',
-   * 'template' -- the browser column'Card',
-   * 'deck' -- the browser column'Deck',
-   * 'noteFld' -- the browser column'Sort Field',
-   * 'noteCrt' -- the browser column'Created',
-   * 'noteMod' -- the browser column'Edited',
-   * 'cardMod' -- the browser column'Changed',
-   * 'cardDue' -- the browser column'Due',
-   * 'cardIvl' -- the browser column'Interval',
-   * 'cardEase' -- the browser column'Ease',
-   * 'cardReps' -- the browser column'Reviews',
-   * 'cardLapses' -- the browser column'Lapses',
-   * 'noteTags' -- the browser column'Tags',
-   * 'note' -- the browser column'Note',
+   * | value | description |
+   * | ----- | ----------- |
+   * | question | the browser column'Question' |
+   * | answer | the browser column'Answer' |
+   * | template | the browser column'Card' |
+   * | deck | the browser column'Deck' |
+   * | noteFld | the browser column'Sort Field' |
+   * | noteCrt | the browser column'Created' |
+   * | noteMod | the browser column'Edited' |
+   * | cardMod | the browser column'Changed' |
+   * | cardDue | the browser column'Due' |
+   * | cardIvl | the browser column'Interval' |
+   * | cardEase | the browser column'Ease' |
+   * | cardReps | the browser column'Reviews' |
+   * | cardLapses | the browser column'Lapses' |
+   * | noteTags | the browser column'Tags' |
+   * | note | the browser column'Note' |
    *
    * The default columns are: noteFld, template, cardDue and deck
    *
    * This is not in the json at creaton. It's added when the browser is open.
    */
-  activeCols?: string[];
+  activeCols?: (
+    | "question"
+    | "answer"
+    | "template"
+    | "deck"
+    | "noteFld"
+    | "noteCrt"
+    | "noteMod"
+    | "cardMod"
+    | "cardDue"
+    | "cardIvl"
+    | "cardEase"
+    | "cardReps"
+    | "cardLapses"
+    | "noteTags"
+    | "note"
+  )[];
 }
 
 export interface Model {
@@ -369,19 +467,22 @@ export interface Model {
   /**  Integer specifying which field is used for sorting in the browser */
   sortf: number;
 
-  /**  Anki saves the tags of the last added note to the current model, use an empty array [] */
+  /**  Anki saves the tags of the last added note to the current model, use an empty array `[]` */
   tags: string[];
 
   /** JSONArray containing object of CardTemplate for each card in model */
   tmpls: Template[];
 
-  /**  Integer specifying what type of model. 0 for standard, 1 for cloze */
-  type: number;
+  /**  Integer specifying what type of model.
+   *
+   * `0` for standard, `1` for cloze
+   */
+  type: 0 | 1;
 
   /**  usn: Update sequence number: used in same way as other usn vales in db */
   usn: number;
 
-  /**  Legacy version number (unused), use an empty array [] */
+  /**  Legacy version number (unused), use an empty array `[]` */
   vers: [];
 }
 
