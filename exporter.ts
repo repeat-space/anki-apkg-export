@@ -1,5 +1,4 @@
 import type {
-  BindParams,
   Database,
   InputFormats,
   ParamsObject,
@@ -7,7 +6,7 @@ import type {
   SqlValue,
 } from "./deps.ts";
 import { checksum, sha1 } from "./hash.ts";
-import { Card, Collection } from "./types.ts";
+import { Card, Collection, Note } from "./types.ts";
 
 export interface Init {
   template: string;
@@ -28,6 +27,8 @@ export interface Fields {
 export type TableName = "cards" | "col" | "notes";
 export interface TableFieldMap {
   cards: keyof Card;
+  col: keyof Collection;
+  notes: keyof Note;
 }
 
 const separator = "\u001F";
@@ -94,7 +95,7 @@ export default class {
     const note_guid = await getNoteGuid(this.topDeckId, front, back);
     const note_id = this._getNoteId(note_guid, now);
 
-    this._update(
+    this.db.run(
       "insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)",
       {
         ":id": note_id, // integer primary key,
@@ -111,7 +112,7 @@ export default class {
       },
     );
 
-    return this._update(
+    this.db.run(
       "insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)",
       {
         ":id": this._getCardId(note_id, now), // integer primary key,
@@ -136,10 +137,6 @@ export default class {
     );
   }
 
-  private _update(query: string, obj?: BindParams) {
-    this.db.prepare(query).getAsObject(obj);
-  }
-
   private getFromCollection<Column extends keyof Collection>(
     column: Column,
   ): Collection[Column] {
@@ -162,13 +159,18 @@ export default class {
 
     const query = `update col set ${updaters.join(", ")} where id=1`;
 
-    this._update(query, params);
+    this.db.run(query, params);
   }
 
-  private getId(table: TableName, col: string, ts: number) {
+  private getId<
+    TName extends TableName,
+    Column extends TableFieldMap[TName],
+  >(table: TName, col: Column, ts: number) {
     const query =
       `SELECT ${col} from ${table} WHERE ${col} >= :ts ORDER BY ${col} DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ":ts": ts });
+    const statement = this.db.prepare(query);
+    const rowObj = statement.getAsObject({ ":ts": ts });
+    statement.free();
 
     return rowObj[col] ? +(rowObj?.[col] ?? 0) + 1 : ts;
   }
@@ -176,7 +178,9 @@ export default class {
   private _getNoteId(guid: string, ts: number) {
     const query =
       `SELECT id from notes WHERE guid = :guid ORDER BY id DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ":guid": guid });
+    const statement = this.db.prepare(query);
+    const rowObj = statement.getAsObject({ ":guid": guid });
+    statement.free();
 
     return rowObj.id || this.getId("notes", "id", ts);
   }
@@ -184,7 +188,9 @@ export default class {
   private _getCardId(note_id: SqlValue, ts: number) {
     const query =
       `SELECT id from cards WHERE nid = :note_id ORDER BY id DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ":note_id": note_id });
+    const statement = this.db.prepare(query);
+    const rowObj = statement.getAsObject({ ":note_id": note_id });
+    statement.free();
 
     return rowObj.id || this.getId("cards", "id", ts);
   }
