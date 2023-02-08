@@ -2,11 +2,12 @@ import type {
   BindParams,
   Database,
   InputFormats,
+  ParamsObject,
   SqlJsStatic,
   SqlValue,
 } from "./deps.ts";
 import { checksum, sha1 } from "./hash.ts";
-import { Card, Deck, Model } from "./types.ts";
+import { Card, Collection } from "./types.ts";
 
 export interface Init {
   template: string;
@@ -50,20 +51,20 @@ export default class {
     this.topDeckId = this.getId("cards", "did", now);
     this.topModelId = this.getId("notes", "mid", now);
 
-    const decks = this.getDecks();
+    const decks = this.getFromCollection("decks");
     const deck = getLastItem(decks);
     deck.name = this.deckName;
     deck.id = this.topDeckId;
     decks[`${this.topDeckId}`] = deck;
-    this.setDecks(decks);
 
-    const models = this.getModels();
+    const models = this.getFromCollection("models");
     const model = getLastItem(models);
     model.name = this.deckName;
     model.did = this.topDeckId;
     model.id = this.topModelId;
     models[`${this.topModelId}`] = model;
-    this.setModels(models);
+
+    this.setCollection({ decks, models });
   }
 
   save(): AnkiPkg {
@@ -139,42 +140,29 @@ export default class {
     this.db.prepare(query).getAsObject(obj);
   }
 
-  private _getInitialRowValue(table: TableName, column = "id") {
-    const query = `select ${column} from ${table}`;
-    return this._getFirstVal(query);
-  }
-
-  private getDecks() {
-    const decks: Record<string, Deck> = this._getInitialRowValue(
-      "col",
-      "decks",
-    );
-    return decks;
-  }
-
-  private setDecks(decks: Record<string, Deck>) {
-    this._update("update col set decks=:decks where id=1", {
-      ":decks": JSON.stringify(decks),
-    });
-  }
-
-  private getModels() {
-    const models: Record<string, Model> = this._getInitialRowValue(
-      "col",
-      "models",
-    );
-    return models;
-  }
-
-  private setModels(models: Record<string, Model>) {
-    this._update("update col set models=:models where id=1", {
-      ":models": JSON.stringify(models),
-    });
-  }
-
-  private _getFirstVal(query: string) {
+  private getFromCollection<Column extends keyof Collection>(
+    column: Column,
+  ): Collection[Column] {
+    const query = `select ${column} from col`;
     const [firstValue] = this.db.exec(query)[0].values[0];
     return typeof firstValue === "string" ? JSON.parse(firstValue) : firstValue;
+  }
+
+  private setCollection(collection: Partial<Collection>) {
+    const updaters: `${string}=:${string}`[] = [];
+    const params: ParamsObject = {};
+    for (const [key, value] of Object.entries(collection)) {
+      if (value === undefined) continue;
+      updaters.push(`${key}=:${key}`);
+      params[`:${key}`] = typeof value === "object"
+        ? JSON.stringify(value)
+        : value;
+    }
+    if (updaters.length === 0) return;
+
+    const query = `update col set ${updaters.join(", ")} where id=1`;
+
+    this._update(query, params);
   }
 
   private getId(table: TableName, col: string, ts: number) {

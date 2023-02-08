@@ -2,6 +2,7 @@ export { default as initSqlJs } from "https://esm.sh/sql.js@1.8.0";
 export type {
   BindParams,
   Database,
+  ParamsObject,
   SqlJsStatic,
   SqlValue,
 } from "https://esm.sh/sql.js@1.8.0";
