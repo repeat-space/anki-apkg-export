@@ -39,14 +39,14 @@ export interface Card {
   /** | value | description |
    * | ----- | ----------- |
    * | -3 | user buried(In scheduler 2) |
-   * -2=sched buried (In scheduler 2),
-   * -2=buried(In scheduler 1),
-   * -1=suspended,
-   * 0=new,
-   * 1=learning,
-   * 2=review (as for type)
-   * 3=in learning, next rev in at least a day after the previous review
-   * 4=preview
+   * | -2 | sched buried (In scheduler 2) |
+   * | -2 | buried(In scheduler 1) |
+   * | -1 | suspended |
+   * | 0 | new |
+   * | 1 | learning |
+   * | 2 | review (as for type) |
+   * | 3 | in learning, next rev in at least a day after the previous review |
+   * | 4 | preview |
    */
   queue: -3 | -1 | -2 | -1 | 0 | 1 | 2 | 3 | 4;
 
@@ -92,7 +92,13 @@ export interface Card {
 
   /** This integer mod 8 represents a "flag", which can be see in browser and while reviewing a note.
    *
-   * Red 1, Orange 2, Green 3, Blue 4, no flag: 0.
+   * | color | num |
+   * | ----- | --- |
+   * | Red | 1 |
+   * | Orange | 2 |
+   * | Green | 3 |
+   * | Blue | 4 |
+   * | no frag | 0 |
    *
    * This integer divided by 8 represents currently nothing
    */
