@@ -68,9 +68,9 @@ describe("Anki package", () => {
         decks: [deck],
         models: [{
           ...model,
-          notes: cards.map(({ front, back }, index) => ({
+          notes: cards.map(({ front, back }) => ({
             fields: [front, back],
-            created: id + index,
+            created: id,
           })),
         }],
       },
@@ -137,10 +137,10 @@ describe("Anki package", () => {
         decks: [deck],
         models: [{
           ...model,
-          notes: cards.map(([front, back, tags], index) => ({
+          notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
-            created: id + index,
+            created: id,
           })),
         }],
       },
@@ -209,7 +209,11 @@ describe("Anki package", () => {
         "Cloze hint 2",
         ["some_string_tags"],
       ],
-      ["Card front side 3", "Card back side 3"],
+      [
+        "{{c1::Card}} {{c2::front}}} {{c3::side}} {{c4::3::数字}}",
+        "Card back side 3",
+      ],
+      ["Card front side 4", "Card back side 4"],
     ];
     const id = new Date().getTime();
     const ankiDB = await makeAnkiDB(
@@ -217,10 +221,10 @@ describe("Anki package", () => {
         decks: [deck],
         models: [{
           ...model,
-          notes: cards.map(([front, back, tags], index) => ({
+          notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
-            created: id + index,
+            created: id,
           })),
         }],
       },
@@ -259,12 +263,16 @@ describe("Anki package", () => {
         tags: cards[1][2]![0],
         ord: 0,
       },
-      { flds: `${cards[2][0]}${SEPARATOR}${cards[2][1]}`, tags: "", ord: 0 },
       {
         flds: `${cards[1][0]}${SEPARATOR}${cards[1][1]}`,
         tags: cards[1][2]![0],
         ord: 1,
       },
+      { flds: `${cards[2][0]}${SEPARATOR}${cards[2][1]}`, tags: "", ord: 0 },
+      { flds: `${cards[2][0]}${SEPARATOR}${cards[2][1]}`, tags: "", ord: 1 },
+      { flds: `${cards[2][0]}${SEPARATOR}${cards[2][1]}`, tags: "", ord: 2 },
+      { flds: `${cards[2][0]}${SEPARATOR}${cards[2][1]}`, tags: "", ord: 3 },
+      { flds: `${cards[3][0]}${SEPARATOR}${cards[3][1]}`, tags: "", ord: 0 },
     ]);
 
     await Deno.writeFile(

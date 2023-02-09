@@ -94,13 +94,16 @@ export const makeAnkiDB = async (
     timeLim: 0,
   };
 
+  const modelIdGen = makeIdGenerator();
   const models: Record<number, Schema.Model> = Object.fromEntries(
     init.models.map(({ notes: _, ...model }) => {
-      const m = makeModel(model);
+      const m = makeModel(model, modelIdGen);
       return [m.id, m];
     }),
   );
 
+  const deckIdGen = makeIdGenerator();
+  deckIdGen(1);
   const decks: Record<number, Schema.Deck> = {
     1: {
       collapsed: false,
@@ -120,7 +123,7 @@ export const makeAnkiDB = async (
     },
     ...Object.fromEntries(
       init.decks.map((deck) => {
-        const d = makeDeck(deck);
+        const d = makeDeck(deck, deckIdGen);
         return [d.id, d];
       }),
     ),
@@ -266,16 +269,21 @@ export const makeAnkiDB = async (
   const cardStmt = db.prepare(
     "insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)",
   );
+  const noteIdGen = makeIdGenerator();
+  const cardIdGen = makeIdGenerator();
   for (const { notes, ...model } of init.models) {
     for (const note of notes) {
+      const noteScheme = await makeNote(note, model.created, noteIdGen);
       noteStmt.run(
         Object.fromEntries(
-          [...Object.entries(await makeNote(note, model.created))].map((
+          [...Object.entries(noteScheme)].map((
             [key, value],
           ) => [`:${key}`, value]),
         ),
       );
-      for (const card of makeCards(model, note)) {
+      for (
+        const card of makeCards(model, noteScheme.id, note.fields, cardIdGen)
+      ) {
         cardStmt.run(
           Object.fromEntries(
             [...Object.entries(card)].map((
@@ -313,11 +321,15 @@ export const makeApkg = (
 };
 
 const separator = "\u001F";
-const makeNote = async (note: Note, modelId: number): Promise<Schema.Note> => {
+const makeNote = async (
+  note: Note,
+  modelId: number,
+  idGen: IdGen,
+): Promise<Schema.Note> => {
   const flds = note.fields.join(separator);
 
   return {
-    id: note.created,
+    id: idGen(note.created),
     guid: note.guid ?? await sha1(flds),
     tags: note.tags?.map?.((tag) => tag.replaceAll(" ", "_"))?.join?.(" ") ??
       "",
@@ -332,12 +344,21 @@ const makeNote = async (note: Note, modelId: number): Promise<Schema.Note> => {
   };
 };
 
-const makeCards = (model: Omit<Model, "notes">, note: Note): Schema.Card[] =>
-  model.isCloze ? makeClozeCards(model, note) : makeNormalCards(model, note);
+const makeCards = (
+  model: Omit<Model, "notes">,
+  noteId: number,
+  fields: string[],
+  idGen: IdGen,
+): Schema.Card[] =>
+  model.isCloze
+    ? makeClozeCards(model, noteId, fields, idGen)
+    : makeNormalCards(model, noteId, fields, idGen);
 
 const makeNormalCards = (
   model: Omit<Model, "notes">,
-  note: Note,
+  noteId: number,
+  fields: string[],
+  idGen: IdGen,
 ): Schema.Card[] => {
   const fieldNames = model.fields.map((field) =>
     typeof field === "string" ? field : field.name
@@ -351,21 +372,23 @@ const makeNormalCards = (
     ) {
       const index = fieldNames.indexOf(fieldName);
       if (index < 0) continue;
-      if (!note.fields[index]) return [];
+      if (!fields[index]) return [];
     }
 
     return [makeCard({
       ord,
-      noteId: note.created,
+      noteId,
       deckId: model.deckId ?? 1,
-      created: note.created + ord,
-    })];
+      created: noteId,
+    }, idGen)];
   });
 };
 
 const makeClozeCards = (
   model: Omit<Model, "notes">,
-  note: Note,
+  noteId: number,
+  fields: string[],
+  idGen: IdGen,
 ): Schema.Card[] => {
   const qfmt = model.templates[0].question;
   const clozeReplacements = new Set(
@@ -383,7 +406,7 @@ const makeClozeCards = (
         .findIndex((field) =>
           (typeof field === "string" ? field : field.name) === fieldName
         );
-      const fieldValue = fieldIndex < 0 ? "" : note.fields[fieldIndex];
+      const fieldValue = fieldIndex < 0 ? "" : fields[fieldIndex];
       const updates = [...fieldValue.matchAll(/{{c(\d+)::.+?}}/g)].map((
         [_, m],
       ) => parseInt(m)).flatMap((m) => m >= 1 ? [m - 1] : []);
@@ -392,13 +415,13 @@ const makeClozeCards = (
   );
 
   if (cardOrds.size === 0) cardOrds.add(0);
-  return [...cardOrds].map((cardOrd, i) =>
+  return [...cardOrds].map((cardOrd) =>
     makeCard({
       ord: cardOrd,
-      noteId: note.created,
+      noteId,
       deckId: model.deckId ?? 1,
-      created: note.created + cardOrd + i,
-    })
+      created: noteId,
+    }, idGen)
   );
 };
 
@@ -412,9 +435,10 @@ interface Card {
 
 const makeCard = (
   card: Card,
+  idGen: IdGen,
 ): Schema.Card => ({
   ord: card.ord,
-  id: card.created,
+  id: idGen(card.created),
   nid: card.noteId,
   did: card.deckId,
   mod: card.updated ?? Math.round(card.created / 1000),
@@ -433,7 +457,10 @@ const makeCard = (
   data: "",
 });
 
-const makeModel = (model: Omit<Model, "notes">): Schema.Model => ({
+const makeModel = (
+  model: Omit<Model, "notes">,
+  idGen: IdGen,
+): Schema.Model => ({
   vers: [],
   name: model.name,
   tags: [],
@@ -449,7 +476,7 @@ const makeModel = (model: Omit<Model, "notes">): Schema.Model => ({
   ),
   latexPost: model.latex?.[1] ?? "\\end{document}",
   type: model.isCloze ? 1 : 0,
-  id: model.created,
+  id: idGen(model.created),
   css: model.css ??
     ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
   mod: model.updated ?? Math.round(model.created / 1000),
@@ -486,14 +513,14 @@ const makeTemplage = (template: Template, ord: number): Schema.Template => ({
   bqfmt: template.example?.[1] ?? "",
 });
 
-const makeDeck = (deck: Deck): Schema.Deck => ({
+const makeDeck = (deck: Deck, idGen: IdGen): Schema.Deck => ({
   collapsed: false,
   conf: 1,
   desc: deck.description ?? "",
   dyn: 0,
   extendNew: 10,
   extendRev: 50,
-  id: deck.created,
+  id: idGen(deck.created),
   lrnToday: [545, 0],
   mod: deck.updated ?? Math.round(deck.created / 1000),
   name: deck.name,
@@ -502,3 +529,15 @@ const makeDeck = (deck: Deck): Schema.Deck => ({
   timeToday: [545, 0],
   usn: -1,
 });
+
+type IdGen = (id: number) => number;
+const makeIdGenerator = (): IdGen => {
+  let counter = -1;
+  return (id) => {
+    if (counter < id) {
+      counter = id;
+      return id;
+    }
+    return ++counter;
+  };
+};
