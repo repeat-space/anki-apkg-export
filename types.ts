@@ -12,9 +12,11 @@ export interface Card {
   /** deck id (available in col table) */
   did: number;
 
-  /** ordinal : identifies which of the card templates or cloze deletions it corresponds to for card templates, valid values are from 0 to num templates - 1
+  /** ordinal : identifies which of the card templates or cloze deletions it corresponds to
    *
-   *   for cloze deletions, valid values are from 0 to max cloze index - 1 (they're 0 indexed despite the first being called `c1`)
+   * for card templates, valid values are from 0 to num templates - 1
+   *
+   * for cloze deletions, valid values are from 0 to max cloze index - 1 (they're 0 indexed despite the first being called `c1`)
    */
   ord: number;
 
@@ -176,7 +178,7 @@ export interface Note {
   id: number;
 
   /** globally unique id, almost certainly used for syncing */
-  guid: number;
+  guid: string;
 
   /** model id */
   mid: number;
@@ -205,7 +207,7 @@ export interface Note {
    *
    * Text is stored in this integer field.
    */
-  sfld: number;
+  sfld: number | string;
 
   /** field checksum used for duplicate check.
    *
@@ -217,7 +219,7 @@ export interface Note {
   flags: number;
 
   /** unused */
-  data: number;
+  data: string;
 }
 
 export interface Deck {

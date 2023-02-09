@@ -1,22 +1,504 @@
-import Exporter from "./exporter.ts";
-import { createTemplate, TemplateInit } from "./template.ts";
-import type { SqlJsStatic } from "./deps.ts";
-
-export { Exporter };
-export type { SqlJsStatic, TemplateInit };
+import type { InputFormats, JSZip, SqlJsStatic } from "./deps.ts";
+import { sha1 } from "./hash.ts";
+import * as Schema from "./types.ts";
 
 export interface Init {
-  template?: TemplateInit;
+  template: string;
   sql: SqlJsStatic;
 }
 
-const exporter = (deckName: string, init: Init) => {
-  const { template, sql } = init;
+export interface Media {
+  filename: string;
+  data: InputFormats;
+}
 
-  return new Exporter(deckName, {
-    template: createTemplate(template),
-    sql,
+export interface Fields {
+  front: string;
+  back: string;
+  tag?: string | string[];
+}
+
+export interface Deck {
+  /** used as deck ID */
+  created: number;
+  updated?: number;
+  name: string;
+  description?: string;
+}
+
+export interface Note {
+  guid?: string;
+  /** used as note ID */
+  created: number;
+  updated?: number;
+  tags?: string[];
+  fields: string[];
+}
+
+export interface Model {
+  name: string;
+  /** used as model(aka. note type) ID */
+  created: number;
+
+  updated?: number;
+
+  /** @default 1 */
+  deckId?: number;
+
+  fields: Field[] | string[];
+  templates: Template[];
+  latex?: [string, string];
+  css?: string;
+  isCloze?: boolean;
+  notes: Note[];
+}
+
+export interface Field {
+  name: string;
+  rtl?: boolean;
+  font?: string;
+  fontSize?: number;
+}
+
+export interface Template {
+  name: string;
+  question: string;
+  answer: string;
+  example?: [string, string];
+}
+
+export interface AnkiDBInit {
+  decks: Deck[];
+  models: Model[];
+}
+
+export const makeAnkiDB = async (
+  init: AnkiDBInit,
+  sql: Pick<SqlJsStatic, "Database">,
+): Promise<Uint8Array> => {
+  const db = new sql.Database();
+
+  const conf: Schema.Conf = {
+    activeDecks: [1],
+    addToCur: true,
+    collapseTime: 1200,
+    curDeck: 1,
+    curModel: "1435645724216",
+    dueCounts: true,
+    estTimes: true,
+    newBury: true,
+    newSpread: 0,
+    nextPos: 1,
+    sortBackwards: false,
+    sortType: "noteFld",
+    timeLim: 0,
+  };
+
+  const models: Record<number, Schema.Model> = Object.fromEntries(
+    init.models.map(({ notes: _, ...model }) => {
+      const m = makeModel(model);
+      return [m.id, m];
+    }),
+  );
+
+  const decks: Record<number, Schema.Deck> = {
+    1: {
+      collapsed: false,
+      conf: 1,
+      desc: "",
+      dyn: 0,
+      extendNew: 10,
+      extendRev: 50,
+      id: 1,
+      lrnToday: [0, 0],
+      mod: 0,
+      name: "Default",
+      newToday: [0, 0],
+      revToday: [0, 0],
+      timeToday: [0, 0],
+      usn: 0,
+    },
+    ...Object.fromEntries(
+      init.decks.map((deck) => {
+        const d = makeDeck(deck);
+        return [d.id, d];
+      }),
+    ),
+  };
+
+  const dconf: Record<number, Schema.DConf> = {
+    1: {
+      autoplay: true,
+      id: 1,
+      lapse: {
+        delays: [10],
+        leechAction: 0,
+        leechFails: 8,
+        minInt: 1,
+        mult: 0,
+      },
+      maxTaken: 60,
+      mod: 0,
+      name: "Default",
+      new: {
+        bury: true,
+        delays: [1, 10],
+        initialFactor: 2500,
+        ints: [1, 4, 7],
+        order: 1,
+        perDay: 20,
+        separate: true,
+      },
+      replayq: true,
+      rev: {
+        bury: true,
+        ease4: 1.3,
+        fuzz: 0.05,
+        ivlFct: 1,
+        maxIvl: 36500,
+        minSpace: 1,
+        perDay: 100,
+      },
+      timer: 0,
+      usn: 0,
+    },
+  };
+
+  const template = `
+    PRAGMA foreign_keys=OFF;
+    BEGIN TRANSACTION;
+    CREATE TABLE col (
+        id              integer primary key,
+        crt             integer not null,
+        mod             integer not null,
+        scm             integer not null,
+        ver             integer not null,
+        dty             integer not null,
+        usn             integer not null,
+        ls              integer not null,
+        conf            text not null,
+        models          text not null,
+        decks           text not null,
+        dconf           text not null,
+        tags            text not null
+    );
+    INSERT INTO "col" VALUES(
+      1,
+      1388548800,
+      1435645724219,
+      1435645724215,
+      11,
+      0,
+      0,
+      0,
+      '${JSON.stringify(conf)}',
+      '${JSON.stringify(models)}',
+      '${JSON.stringify(decks)}',
+      '${JSON.stringify(dconf)}',
+      '{}'
+    );
+    CREATE TABLE notes (
+        id              integer primary key,   /* 0 */
+        guid            text not null,         /* 1 */
+        mid             integer not null,      /* 2 */
+        mod             integer not null,      /* 3 */
+        usn             integer not null,      /* 4 */
+        tags            text not null,         /* 5 */
+        flds            text not null,         /* 6 */
+        sfld            integer not null,      /* 7 */
+        csum            integer not null,      /* 8 */
+        flags           integer not null,      /* 9 */
+        data            text not null          /* 10 */
+    );
+    CREATE TABLE cards (
+        id              integer primary key,   /* 0 */
+        nid             integer not null,      /* 1 */
+        did             integer not null,      /* 2 */
+        ord             integer not null,      /* 3 */
+        mod             integer not null,      /* 4 */
+        usn             integer not null,      /* 5 */
+        type            integer not null,      /* 6 */
+        queue           integer not null,      /* 7 */
+        due             integer not null,      /* 8 */
+        ivl             integer not null,      /* 9 */
+        factor          integer not null,      /* 10 */
+        reps            integer not null,      /* 11 */
+        lapses          integer not null,      /* 12 */
+        left            integer not null,      /* 13 */
+        odue            integer not null,      /* 14 */
+        odid            integer not null,      /* 15 */
+        flags           integer not null,      /* 16 */
+        data            text not null          /* 17 */
+    );
+    CREATE TABLE revlog (
+        id              integer primary key,
+        cid             integer not null,
+        usn             integer not null,
+        ease            integer not null,
+        ivl             integer not null,
+        lastIvl         integer not null,
+        factor          integer not null,
+        time            integer not null,
+        type            integer not null
+    );
+    CREATE TABLE graves (
+        usn             integer not null,
+        oid             integer not null,
+        type            integer not null
+    );
+    ANALYZE sqlite_master;
+    INSERT INTO "sqlite_stat1" VALUES('col',NULL,'1');
+    CREATE INDEX ix_notes_usn on notes (usn);
+    CREATE INDEX ix_cards_usn on cards (usn);
+    CREATE INDEX ix_revlog_usn on revlog (usn);
+    CREATE INDEX ix_cards_nid on cards (nid);
+    CREATE INDEX ix_cards_sched on cards (did, queue, due);
+    CREATE INDEX ix_revlog_cid on revlog (cid);
+    CREATE INDEX ix_notes_csum on notes (csum);
+    COMMIT;
+  `;
+
+  db.run(template);
+
+  const noteStmt = db.prepare(
+    "insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)",
+  );
+  const cardStmt = db.prepare(
+    "insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)",
+  );
+  for (const { notes, ...model } of init.models) {
+    for (const note of notes) {
+      noteStmt.run(
+        Object.fromEntries(
+          [...Object.entries(await makeNote(note, model.created))].map((
+            [key, value],
+          ) => [`:${key}`, value]),
+        ),
+      );
+      for (const card of makeCards(model, note)) {
+        cardStmt.run(
+          Object.fromEntries(
+            [...Object.entries(card)].map((
+              [key, value],
+            ) => [`:${key}`, value]),
+          ),
+        );
+      }
+    }
+  }
+
+  return db.export();
+};
+
+export const makeApkg = (
+  ankiDB: Uint8Array,
+  media: Record<string, InputFormats> | Map<string, InputFormats>,
+  zip: JSZip,
+  options?: Omit<JSZip.JSZipGeneratorOptions<"blob">, "type">,
+): Promise<Blob> => {
+  zip.file("collection.anki2", ankiDB);
+
+  const entries = [
+    ...(media instanceof Map ? media.entries() : Object.entries(media)),
+  ];
+
+  const filenameMap: Record<number, string> = Object.fromEntries(
+    entries.map(([filename], index) => [index, filename]),
+  );
+  zip.file("media", JSON.stringify(filenameMap));
+
+  entries.forEach(([, data], index) => zip.file(`${index}`, data));
+
+  return zip.generateAsync({ type: "blob", ...options });
+};
+
+const separator = "\u001F";
+const makeNote = async (note: Note, modelId: number): Promise<Schema.Note> => {
+  const flds = note.fields.join(separator);
+
+  return {
+    id: note.created,
+    guid: note.guid ?? await sha1(flds),
+    tags: note.tags?.map?.((tag) => tag.replaceAll(" ", "_"))?.join?.(" ") ??
+      "",
+    mid: modelId,
+    mod: note.updated ?? note.created,
+    flds,
+    sfld: flds,
+    usn: -1,
+    flags: 0,
+    data: "",
+    csum: 0, // can be ignore
+  };
+};
+
+const makeCards = (model: Omit<Model, "notes">, note: Note): Schema.Card[] =>
+  model.isCloze ? makeClozeCards(model, note) : makeNormalCards(model, note);
+
+const makeNormalCards = (
+  model: Omit<Model, "notes">,
+  note: Note,
+): Schema.Card[] => {
+  const fieldNames = model.fields.map((field) =>
+    typeof field === "string" ? field : field.name
+  );
+
+  return model.templates.flatMap((template, ord) => {
+    for (
+      const [, fieldName] of template.question.matchAll(
+        /{{(?:type\:|hint\:|#|\/)?([^}]+)}}/g,
+      )
+    ) {
+      const index = fieldNames.indexOf(fieldName);
+      if (index < 0) continue;
+      if (!note.fields[index]) return [];
+    }
+
+    return [makeCard({
+      ord,
+      noteId: note.created,
+      deckId: model.deckId ?? 1,
+      created: note.created + ord,
+    })];
   });
 };
 
-export { exporter as default };
+const makeClozeCards = (
+  model: Omit<Model, "notes">,
+  note: Note,
+): Schema.Card[] => {
+  const qfmt = model.templates[0].question;
+  const clozeReplacements = new Set(
+    [
+      ...qfmt.matchAll(/{{[^}]*?cloze:(?:[^}]?:)*(.+?)}}/g),
+      ...qfmt.matchAll(/<%cloze:(.+?)%>/g),
+    ].map((
+      [_, fieldName],
+    ) => fieldName),
+  );
+
+  const cardOrds = new Set(
+    [...clozeReplacements].flatMap((fieldName) => {
+      const fieldIndex = model.fields
+        .findIndex((field) =>
+          (typeof field === "string" ? field : field.name) === fieldName
+        );
+      const fieldValue = fieldIndex < 0 ? "" : note.fields[fieldIndex];
+      const updates = [...fieldValue.matchAll(/{{c(\d+)::.+?}}/g)].map((
+        [_, m],
+      ) => parseInt(m)).flatMap((m) => m >= 1 ? [m - 1] : []);
+      return updates;
+    }),
+  );
+
+  if (cardOrds.size === 0) cardOrds.add(0);
+  return [...cardOrds].map((cardOrd, i) =>
+    makeCard({
+      ord: cardOrd,
+      noteId: note.created,
+      deckId: model.deckId ?? 1,
+      created: note.created + cardOrd + i,
+    })
+  );
+};
+
+interface Card {
+  ord: number;
+  created: number;
+  updated?: number;
+  noteId: number;
+  deckId: number;
+}
+
+const makeCard = (
+  card: Card,
+): Schema.Card => ({
+  ord: card.ord,
+  id: card.created,
+  nid: card.noteId,
+  did: card.deckId,
+  mod: card.updated ?? Math.round(card.created / 1000),
+  usn: -1,
+  type: 0,
+  queue: 0,
+  due: 0,
+  ivl: 0,
+  factor: 0,
+  reps: 0,
+  lapses: 0,
+  left: 0,
+  odue: 0,
+  odid: 0,
+  flags: 0,
+  data: "",
+});
+
+const makeModel = (model: Omit<Model, "notes">): Schema.Model => ({
+  vers: [],
+  name: model.name,
+  tags: [],
+  did: model.deckId ?? 1,
+  usn: -1,
+  req: [[0, "all", [0]]],
+  flds: model.fields.map((field, index) => makeField(field, index)),
+  sortf: 0,
+  latexPre: model.latex?.[0] ??
+    "\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n",
+  tmpls: model.templates.map((template, index) =>
+    makeTemplage(template, index)
+  ),
+  latexPost: model.latex?.[1] ?? "\\end{document}",
+  type: model.isCloze ? 1 : 0,
+  id: model.created,
+  css: model.css ??
+    ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
+  mod: model.updated ?? Math.round(model.created / 1000),
+});
+
+const makeField = (field: string | Field, ord: number): Schema.Field =>
+  typeof field === "string"
+    ? ({
+      name: field,
+      media: [],
+      sticky: false,
+      rtl: false,
+      ord,
+      font: "Arial",
+      size: 20,
+    })
+    : ({
+      name: field.name,
+      media: [],
+      sticky: false,
+      rtl: field.rtl ?? false,
+      ord,
+      font: field.font ?? "Arial",
+      size: field.fontSize ?? 20,
+    });
+
+const makeTemplage = (template: Template, ord: number): Schema.Template => ({
+  name: template.name,
+  ord,
+  did: null,
+  qfmt: template.question,
+  bafmt: template.example?.[0] ?? "",
+  afmt: template.answer,
+  bqfmt: template.example?.[1] ?? "",
+});
+
+const makeDeck = (deck: Deck): Schema.Deck => ({
+  collapsed: false,
+  conf: 1,
+  desc: deck.description ?? "",
+  dyn: 0,
+  extendNew: 10,
+  extendRev: 50,
+  id: deck.created,
+  lrnToday: [545, 0],
+  mod: deck.updated ?? Math.round(deck.created / 1000),
+  name: deck.name,
+  newToday: [545, 0],
+  revToday: [545, 0],
+  timeToday: [545, 0],
+  usn: -1,
+});
