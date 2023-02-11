@@ -1,4 +1,4 @@
-import { Deck, makeAnkiDB, makeApkg, Model } from "../mod.ts";
+import { Deck, makeAnkiDB, makeApkg, NoteType } from "../mod.ts";
 import { initSqlJs, JSZip } from "../deps.ts";
 import {
   afterEach,
@@ -37,13 +37,13 @@ describe("Anki package", () => {
 
   const deck: Deck = {
     name: "deck-name",
-    created: new Date().getTime(),
+    id: new Date().getTime(),
   };
-  const model: Omit<Model, "notes"> = {
+  const model: Omit<NoteType, "notes"> = {
     name: "Basic",
-    created: new Date().getTime(),
+    id: new Date().getTime(),
     fields: ["Front", "Back"],
-    deckId: deck.created,
+    deckId: deck.id,
     templates: [{
       name: "Card 1",
       question: "{{Front}}",
@@ -70,7 +70,7 @@ describe("Anki package", () => {
           ...model,
           notes: cards.map(({ front, back }) => ({
             fields: [front, back],
-            created: id,
+            id,
           })),
         }],
       },
@@ -140,7 +140,7 @@ describe("Anki package", () => {
           notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
-            created: id,
+            id,
           })),
         }],
       },
@@ -186,11 +186,11 @@ describe("Anki package", () => {
   });
 
   it("check a cloze note type", async () => {
-    const model: Omit<Model, "notes"> = {
+    const model: Omit<NoteType, "notes"> = {
       name: "Basic",
-      created: new Date().getTime(),
+      id: new Date().getTime(),
       fields: ["Front", "Hint"],
-      deckId: deck.created,
+      deckId: deck.id,
       isCloze: true,
       templates: [{
         name: "Cloze",
@@ -224,7 +224,7 @@ describe("Anki package", () => {
           notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
-            created: id,
+            id,
           })),
         }],
       },

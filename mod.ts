@@ -1,6 +1,6 @@
 import type { InputFormats, JSZip, SqlJsStatic } from "./deps.ts";
 import { sha1 } from "./hash.ts";
-import * as Schema from "./types.ts";
+import * as Schema from "./schema.ts";
 
 export interface Init {
   template: string;
