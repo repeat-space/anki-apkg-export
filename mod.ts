@@ -35,9 +35,9 @@ export interface Note {
   fields: string[];
 }
 
-export interface Model {
+export interface NoteType {
   name: string;
-  /** model(aka. note type) ID */
+  /** note type ID */
   id: number;
 
   updated?: number;
@@ -69,7 +69,7 @@ export interface Template {
 
 export interface AnkiDBInit {
   decks: Deck[];
-  models: Model[];
+  models: NoteType[];
 }
 
 export const makeAnkiDB = async (
@@ -97,7 +97,7 @@ export const makeAnkiDB = async (
   const modelIdGen = makeIdGenerator();
   const models: Record<number, Schema.Model> = Object.fromEntries(
     init.models.map(({ notes: _, ...model }) => {
-      const m = makeModel(model, modelIdGen);
+      const m = makeNoteType(model, modelIdGen);
       return [m.id, m];
     }),
   );
@@ -271,9 +271,9 @@ export const makeAnkiDB = async (
   );
   const noteIdGen = makeIdGenerator();
   const cardIdGen = makeIdGenerator();
-  for (const { notes, ...model } of init.models) {
+  for (const { notes, ...noteType } of init.models) {
     for (const note of notes) {
-      const noteScheme = await makeNote(note, model.id, noteIdGen);
+      const noteScheme = await makeNote(note, noteType.id, noteIdGen);
       noteStmt.run(
         Object.fromEntries(
           [...Object.entries(noteScheme)].map((
@@ -282,7 +282,7 @@ export const makeAnkiDB = async (
         ),
       );
       for (
-        const card of makeCards(model, noteScheme.id, note.fields, cardIdGen)
+        const card of makeCards(noteType, noteScheme.id, note.fields, cardIdGen)
       ) {
         cardStmt.run(
           Object.fromEntries(
@@ -345,26 +345,26 @@ const makeNote = async (
 };
 
 const makeCards = (
-  model: Omit<Model, "notes">,
+  noteType: Omit<NoteType, "notes">,
   noteId: number,
   fields: string[],
   idGen: IdGen,
 ): Schema.Card[] =>
-  model.isCloze
-    ? makeClozeCards(model, noteId, fields, idGen)
-    : makeNormalCards(model, noteId, fields, idGen);
+  noteType.isCloze
+    ? makeClozeCards(noteType, noteId, fields, idGen)
+    : makeNormalCards(noteType, noteId, fields, idGen);
 
 const makeNormalCards = (
-  model: Omit<Model, "notes">,
+  noteType: Omit<NoteType, "notes">,
   noteId: number,
   fields: string[],
   idGen: IdGen,
 ): Schema.Card[] => {
-  const fieldNames = model.fields.map((field) =>
+  const fieldNames = noteType.fields.map((field) =>
     typeof field === "string" ? field : field.name
   );
 
-  return model.templates.flatMap((template, ord) => {
+  return noteType.templates.flatMap((template, ord) => {
     for (
       const [, fieldName] of template.question.matchAll(
         /{{(?:type\:|hint\:|#|\/)?([^}]+)}}/g,
@@ -378,19 +378,19 @@ const makeNormalCards = (
     return [makeCard({
       ord,
       noteId,
-      deckId: model.deckId ?? 1,
+      deckId: noteType.deckId ?? 1,
       created: noteId,
     }, idGen)];
   });
 };
 
 const makeClozeCards = (
-  model: Omit<Model, "notes">,
+  noteType: Omit<NoteType, "notes">,
   noteId: number,
   fields: string[],
   idGen: IdGen,
 ): Schema.Card[] => {
-  const qfmt = model.templates[0].question;
+  const qfmt = noteType.templates[0].question;
   const clozeReplacements = new Set(
     [
       ...qfmt.matchAll(/{{[^}]*?cloze:(?:[^}]?:)*(.+?)}}/g),
@@ -402,7 +402,7 @@ const makeClozeCards = (
 
   const cardOrds = new Set(
     [...clozeReplacements].flatMap((fieldName) => {
-      const fieldIndex = model.fields
+      const fieldIndex = noteType.fields
         .findIndex((field) =>
           (typeof field === "string" ? field : field.name) === fieldName
         );
@@ -419,7 +419,7 @@ const makeClozeCards = (
     makeCard({
       ord: cardOrd,
       noteId,
-      deckId: model.deckId ?? 1,
+      deckId: noteType.deckId ?? 1,
       created: noteId,
     }, idGen)
   );
@@ -457,29 +457,29 @@ const makeCard = (
   data: "",
 });
 
-const makeModel = (
-  model: Omit<Model, "notes">,
+const makeNoteType = (
+  noteType: Omit<NoteType, "notes">,
   idGen: IdGen,
 ): Schema.Model => ({
   vers: [],
-  name: model.name,
+  name: noteType.name,
   tags: [],
-  did: model.deckId ?? 1,
+  did: noteType.deckId ?? 1,
   usn: -1,
   req: [[0, "all", [0]]],
-  flds: model.fields.map((field, index) => makeField(field, index)),
+  flds: noteType.fields.map((field, index) => makeField(field, index)),
   sortf: 0,
-  latexPre: model.latex?.[0] ??
+  latexPre: noteType.latex?.[0] ??
     "\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n",
-  tmpls: model.templates.map((template, index) =>
+  tmpls: noteType.templates.map((template, index) =>
     makeTemplage(template, index)
   ),
-  latexPost: model.latex?.[1] ?? "\\end{document}",
-  type: model.isCloze ? 1 : 0,
-  id: idGen(model.id),
-  css: model.css ??
+  latexPost: noteType.latex?.[1] ?? "\\end{document}",
+  type: noteType.isCloze ? 1 : 0,
+  id: idGen(noteType.id),
+  css: noteType.css ??
     ".card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n",
-  mod: model.updated ?? Math.round(model.id / 1000),
+  mod: noteType.updated ?? Math.round(noteType.id / 1000),
 });
 
 const makeField = (field: string | Field, ord: number): Schema.Field =>
