@@ -94,13 +94,32 @@ export const makeCollection = async (
     timeLim: 0,
   };
 
-  const modelIdGen = makeIdGenerator();
-  const models: Record<number, Schema.Model> = Object.fromEntries(
-    init.models.map(({ notes: _, ...model }) => {
-      const m = makeNoteType(model, modelIdGen);
-      return [m.id, m];
-    }),
-  );
+  const models: Record<number, Schema.Model> = {};
+  const notes: Record<number, Schema.Note> = {};
+  const cards: Record<number, Schema.Card> = {};
+  {
+    const modelIdGen = makeIdGenerator();
+    const noteIdGen = makeIdGenerator();
+    const cardIdGen = makeIdGenerator();
+    for (const { notes: notes_, ...noteType } of init.models) {
+      const model = makeNoteType(noteType, modelIdGen);
+      models[model.id] = model;
+      for (const note of notes_) {
+        const noteScheme = await makeNote(note, noteType.id, noteIdGen);
+        notes[noteScheme.id] = noteScheme;
+        for (
+          const card of makeCards(
+            noteType,
+            noteScheme.id,
+            note.fields,
+            cardIdGen,
+          )
+        ) {
+          cards[card.id] = card;
+        }
+      }
+    }
+  }
 
   const deckIdGen = makeIdGenerator();
   deckIdGen(1);
@@ -266,33 +285,28 @@ export const makeCollection = async (
   const noteStmt = db.prepare(
     "insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)",
   );
+  for (const note of Object.values(notes)) {
+    noteStmt.run(
+      Object.fromEntries(
+        [...Object.entries(note)].map((
+          [key, value],
+        ) => [`:${key}`, value]),
+      ),
+    );
+  }
   const cardStmt = db.prepare(
     "insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)",
   );
-  const noteIdGen = makeIdGenerator();
-  const cardIdGen = makeIdGenerator();
-  for (const { notes, ...noteType } of init.models) {
-    for (const note of notes) {
-      const noteScheme = await makeNote(note, noteType.id, noteIdGen);
-      noteStmt.run(
-        Object.fromEntries(
-          [...Object.entries(noteScheme)].map((
-            [key, value],
-          ) => [`:${key}`, value]),
-        ),
-      );
-      for (
-        const card of makeCards(noteType, noteScheme.id, note.fields, cardIdGen)
-      ) {
-        cardStmt.run(
-          Object.fromEntries(
-            [...Object.entries(card)].map((
-              [key, value],
-            ) => [`:${key}`, value]),
-          ),
-        );
-      }
-    }
+  for (
+    const card of Object.values(cards)
+  ) {
+    cardStmt.run(
+      Object.fromEntries(
+        [...Object.entries(card)].map((
+          [key, value],
+        ) => [`:${key}`, value]),
+      ),
+    );
   }
 
   return db.export();
