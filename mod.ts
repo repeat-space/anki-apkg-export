@@ -67,13 +67,13 @@ export interface Template {
   example?: [string, string];
 }
 
-export interface AnkiDBInit {
+export interface CollectionInit {
   decks: Deck[];
   models: NoteType[];
 }
 
-export const makeAnkiDB = async (
-  init: AnkiDBInit,
+export const makeCollection = async (
+  init: CollectionInit,
   sql: Pick<SqlJsStatic, "Database">,
 ): Promise<Uint8Array> => {
   const db = new sql.Database();
@@ -298,7 +298,7 @@ export const makeAnkiDB = async (
   return db.export();
 };
 
-export const makeApkg = (
+export const makePackage = (
   ankiDB: Uint8Array,
   media: Record<string, InputFormats> | Map<string, InputFormats>,
   zip: JSZip,

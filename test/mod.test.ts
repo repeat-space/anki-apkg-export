@@ -1,4 +1,4 @@
-import { Deck, makeAnkiDB, makeApkg, NoteType } from "../mod.ts";
+import { Deck, makeCollection, makePackage, NoteType } from "../mod.ts";
 import { initSqlJs, JSZip } from "../deps.ts";
 import {
   afterEach,
@@ -63,7 +63,7 @@ describe("Anki package", () => {
 
     // Create deck as in previous example
     const id = new Date().getTime();
-    const ankiDB = await makeAnkiDB(
+    const ankiDB = await makeCollection(
       {
         decks: [deck],
         models: [{
@@ -80,7 +80,7 @@ describe("Anki package", () => {
     const image = await Deno.readFile(
       new URL("./fixtures/anki.png", import.meta.url),
     );
-    const apkg = await makeApkg(ankiDB, { "anki.png": image }, new JSZip());
+    const apkg = await makePackage(ankiDB, { "anki.png": image }, new JSZip());
 
     const unzip = new JSZip();
     await unzip.loadAsync(apkg);
@@ -132,7 +132,7 @@ describe("Anki package", () => {
       ["Card front side 3", "Card back side 3"],
     ];
     const id = new Date().getTime();
-    const ankiDB = await makeAnkiDB(
+    const ankiDB = await makeCollection(
       {
         decks: [deck],
         models: [{
@@ -147,7 +147,7 @@ describe("Anki package", () => {
       sql,
     );
 
-    const apkg = await makeApkg(ankiDB, {}, new JSZip());
+    const apkg = await makePackage(ankiDB, {}, new JSZip());
 
     const unzip = new JSZip();
     await unzip.loadAsync(apkg);
@@ -216,7 +216,7 @@ describe("Anki package", () => {
       ["Card front side 4", "Card back side 4"],
     ];
     const id = new Date().getTime();
-    const ankiDB = await makeAnkiDB(
+    const ankiDB = await makeCollection(
       {
         decks: [deck],
         models: [{
@@ -231,7 +231,7 @@ describe("Anki package", () => {
       sql,
     );
 
-    const apkg = await makeApkg(ankiDB, {}, new JSZip());
+    const apkg = await makePackage(ankiDB, {}, new JSZip());
 
     const unzip = new JSZip();
     await unzip.loadAsync(apkg);
