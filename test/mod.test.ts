@@ -140,8 +140,12 @@ describe("Anki package", () => {
           notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
+            // HEAD
             id,
-          })),
+            //
+            created: id,
+          } //1b630d33a2a9b04470f01d04d6544e979f2e2d17
+          )),
         }],
       },
       sql,
@@ -224,8 +228,12 @@ describe("Anki package", () => {
           notes: cards.map(([front, back, tags]) => ({
             fields: [front, back],
             tags,
+            // HEAD
             id,
-          })),
+            //
+            created: id,
+          } //1b630d33a2a9b04470f01d04d6544e979f2e2d17
+          )),
         }],
       },
       sql,
