@@ -63,20 +63,20 @@ test('check internal structure', async t => {
   const db = new sqlite3.Database(destUnpackedDb);
   const result = await pify(db.all.bind(db))(
     `SELECT
-      notes.sfld as front,
-      notes.flds as back
+      notes.sfld as sortField,
+      notes.flds as fields
       from cards JOIN notes where cards.nid = notes.id ORDER BY cards.id`
   );
   db.close();
 
   // compare content from just created db with original list of cards
   const normilizedResult = sortBy(
-    result.map(({ front, back }) => ({
-      front,
-      back: back.split(SEPARATOR).pop()
-    })),
-    'front'
-  );
+    result.map(({ fields, sortField }) => {
+      fields = fields.split(SEPARATOR);
+      return { front: fields[0], back: fields[1], sortField: fields[sortField] };
+    }),
+    'sortField'
+  ).map(({ front, back }) => ({ front, back }));
 
   t.deepEqual(normilizedResult, cards);
 });
@@ -99,20 +99,20 @@ test('check internal structure on adding card with tags', async t => {
   const db = new sqlite3.Database(`${unzipedDeck}/collection.anki2`);
   const results = await pify(db.all.bind(db))(
     `SELECT
-      notes.sfld as front,
-      notes.flds as back,
+      notes.sfld as sortField,
+      notes.flds as fields,
       notes.tags as tags
-      from cards JOIN notes where cards.nid = notes.id ORDER BY front`
+      from cards JOIN notes where cards.nid = notes.id ORDER BY fields`
   );
   db.close();
 
   t.deepEqual(results, [
     {
-      front: front1,
-      back: `${front1}${SEPARATOR}${back1}`,
+      sortField: 0,
+      fields: `${front1}${SEPARATOR}${back1}`,
       tags: ' ' + tags1.map(tag => tag.replace(/ /g, '_')).join(' ') + ' '
     },
-    { front: front2, back: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
-    { front: front3, back: `${front3}${SEPARATOR}${back3}`, tags: '' }
+    { sortField: 0, fields: `${front2}${SEPARATOR}${back2}`, tags: tags2 },
+    { sortField: 0, fields: `${front3}${SEPARATOR}${back3}`, tags: '' }
   ]);
 });

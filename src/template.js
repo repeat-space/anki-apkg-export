@@ -1,4 +1,5 @@
 export default function createTemplate({
+  fields = ['Front', 'Back'],
   questionFormat = '{{Front}}',
   answerFormat = '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
   css = '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\nbackground-color: white;\n}\n'
@@ -27,26 +28,15 @@ export default function createTemplate({
       did: 1435588830424,
       usn: -1,
       req: [[0, 'all', [0]]],
-      flds: [
-        {
-          name: 'Front',
-          media: [],
-          sticky: false,
-          rtl: false,
-          ord: 0,
-          font: 'Arial',
-          size: 20
-        },
-        {
-          name: 'Back',
-          media: [],
-          sticky: false,
-          rtl: false,
-          ord: 1,
-          font: 'Arial',
-          size: 20
-        }
-      ],
+      flds: fields.map((name, i) => ({
+        name,
+        media: [],
+        sticky: false,
+        rtl: false,
+        ord: i,
+        font: 'Arial',
+        size: 20
+      })),
       sortf: 0,
       latexPre:
         '\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n',

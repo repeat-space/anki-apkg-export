@@ -67,10 +67,14 @@ export default class {
     this.media.push({ filename, data });
   }
 
-  addCard(front, back, { tags } = {}) {
+  addCard(...fields) {
+    const options = typeof fields[fields.length - 1] === 'object' ? fields.pop() : undefined;
+    const { sortField, tags } = options || {};
     const { topDeckId, topModelId, separator } = this;
     const now = Date.now();
-    const note_guid = this._getNoteGuid(topDeckId, front, back);
+
+    const joinedFields = fields.join(separator);
+    const note_guid = this._getNoteGuid(topDeckId, joinedFields);
     const note_id = this._getNoteId(note_guid, now);
 
     let strTags = '';
@@ -80,6 +84,18 @@ export default class {
       strTags = this._tagsToStr(tags);
     }
 
+    let intSortField = 0;
+    if (typeof sortField === 'number') {
+      if (Number.isSafeInteger(sortField)) {
+        intSortField = Math.max(Math.min(sortField, fields.length - 1), 0);
+      }
+    } else if (typeof sortField === 'string') {
+      const index = fields.indexOf(sortField);
+      if (index !== -1) {
+        intSortField = index;
+      }
+    }
+
     this._update('insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
       ':id': note_id, // integer primary key,
       ':guid': note_guid, // text not null,
@@ -87,9 +103,9 @@ export default class {
       ':mod': this._getId('notes', 'mod', now), // integer not null,
       ':usn': -1, // integer not null,
       ':tags': strTags, // text not null,
-      ':flds': front + separator + back, // text not null,
-      ':sfld': front, // integer not null,
-      ':csum': this._checksum(front + separator + back), //integer not null,
+      ':flds': joinedFields, // text not null,
+      ':sfld': intSortField, // integer not null,
+      ':csum': this._checksum(joinedFields), //integer not null,
       ':flags': 0, // integer not null,
       ':data': '' // text not null,
     });
@@ -154,8 +170,8 @@ export default class {
     return rowObj.id || this._getId('notes', 'id', ts);
   }
 
-  _getNoteGuid(topDeckId, front, back) {
-    return sha1(`${topDeckId}${front}${back}`);
+  _getNoteGuid(topDeckId, joinedFields) {
+    return sha1(`${topDeckId}${this.separator}${joinedFields}`);
   }
 
   _getCardId(note_id, ts) {

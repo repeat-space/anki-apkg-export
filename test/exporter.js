@@ -62,7 +62,7 @@ test('Exporter.addCard', t => {
     'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
-  t.is(notesUpdate[':sfld'], front);
+  t.is(notesUpdate[':sfld'], 0);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
 
@@ -93,7 +93,7 @@ test('Exporter.addCard with options (tags is array)', t => {
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
   const notesTags = notesUpdate[':tags'].split(' ');
-  t.is(notesUpdate[':sfld'], front);
+  t.is(notesUpdate[':sfld'], 0);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
 
@@ -115,7 +115,7 @@ test('Exporter.addCard with options (tags is string)', t => {
     'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)'
   );
   const notesUpdate = exporterUpdateSpy.args[0][1];
-  t.is(notesUpdate[':sfld'], front);
+  t.is(notesUpdate[':sfld'], 0);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
   t.is(notesUpdate[':tags'], tags);
@@ -149,7 +149,7 @@ test('Exporter.addCard updates note if it is a duplicate', t => {
   const secondNotesUpdate = exporterUpdateSpy.args[2][1];
   t.is(notesUpdate[':id'], secondNotesUpdate[':id']);
   t.is(notesUpdate[':guid'], secondNotesUpdate[':guid']);
-  t.is(notesUpdate[':sfld'], front);
+  t.is(notesUpdate[':sfld'], 0);
   t.is(notesUpdate[':flds'], front + separator + back);
   t.is(notesUpdate[':mid'], topModelId);
 
