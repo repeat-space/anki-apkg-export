@@ -54,7 +54,8 @@
     "test:browser": "playwright test",
     "test:anki": "node scripts/anki-fixtures.mjs && uv run --with anki==26.09.3 python test/anki_import.py",
     "check": "pnpm lint && pnpm format:check && pnpm build && pnpm typecheck && pnpm test && pnpm demo:build",
-    "test:package": "node scripts/package-smoke.mjs"
+    "test:package": "node scripts/package-smoke.mjs",
+    "release": "release-it"
   },
   "dependencies": {
     "@types/node": "^24.0.0",
@@ -71,6 +72,7 @@
     "@types/sha1": "^1.1.5",
     "oxfmt": "^0.71.0",
     "oxlint": "^1.86.0",
+    "release-it": "^21.1.0",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",

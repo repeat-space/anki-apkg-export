@@ -1,0 +1,21 @@
+{
+  "git": {
+    "requireBranch": "master",
+    "requireCleanWorkingDir": true,
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "pushRepo": "origin"
+  },
+  "npm": {
+    "publish": false,
+    "allowSameVersion": true,
+    "skipChecks": true
+  },
+  "github": {
+    "release": false
+  },
+  "hooks": {
+    "before:init": "pnpm check && pnpm test:package",
+    "after:bump": "pnpm install --lockfile-only --ignore-scripts"
+  }
+}
