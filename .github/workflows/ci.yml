@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [master, feat/v5]
+    branches: [main, feat/v5]
   pull_request:
   workflow_dispatch:
 permissions:
