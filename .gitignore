@@ -1,4 +1,7 @@
 /node_modules/
-/dist/
+dist/
+.tmp/
+test-results/
+playwright-report/
 *.log
 play.js

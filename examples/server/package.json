@@ -1,0 +1,11 @@
+{
+  "name": "@anki-apkg-export/server-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "anki-apkg-export": "workspace:*"
+  }
+}

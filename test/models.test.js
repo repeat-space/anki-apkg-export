@@ -15,7 +15,7 @@ it('includes parents when the initial deck is nested', async () => {
   exporter.addCard('東京', 'Tokyo');
   await exporter.save();
   const decks = JSON.parse(exporter.db.exec('SELECT decks FROM col')[0].values[0][0]);
-  expect(Object.values(decks).map(deck => deck.name)).toContain('Languages');
+  expect(Object.values(decks).map((deck) => deck.name)).toContain('Languages');
 });
 
 it('generates both directions and removes the reverse card when Back becomes empty', async () => {
