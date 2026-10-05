@@ -1,17 +1,20 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import SQL from 'sql.js';
 import JSZip from 'jszip';
 import Exporter from '../src/exporter';
 import createTemplate from '../src/template';
 
 const exporters = [];
-function create() {
-  const exporter = new Exporter('Test deck', { sql: SQL, template: createTemplate() });
+function create(templateOptions) {
+  const exporter = new Exporter('Test deck', {
+    sql: SQL,
+    template: createTemplate(templateOptions),
+  });
   exporters.push(exporter);
   return exporter;
 }
 afterEach(() => {
-  for (const exporter of exporters.splice(0)) exporter.db.close();
+  for (const exporter of exporters.splice(0)) exporter.close();
 });
 
 describe('package export', () => {
@@ -50,4 +53,47 @@ describe('package export', () => {
       [' updated '],
     ]);
   });
+});
+
+it('binds custom templates containing quotes as data', () => {
+  const exporter = create({
+    css: ".card { font-family: 'Arial'; }",
+    questionFormat: "What's {{Front}}?",
+  });
+  const models = JSON.parse(exporter.db.exec('SELECT models FROM col')[0].values[0][0]);
+  const model = Object.values(models)[0];
+  expect(model.css).toContain("'Arial'");
+  expect(model.tmpls[0].qfmt).toBe("What's {{Front}}?");
+});
+
+it('keeps ambiguous front/back pairs distinct', () => {
+  const exporter = create();
+  exporter.addCard('ab', 'c');
+  exporter.addCard('a', 'bc');
+  expect(exporter.db.exec('SELECT count(*) FROM notes')[0].values).toEqual([[2]]);
+});
+
+it('frees every prepared statement and closes idempotently', async () => {
+  const exporter = create();
+  const original = exporter.db.prepare.bind(exporter.db);
+  const frees = [];
+  vi.spyOn(exporter.db, 'prepare').mockImplementation((...args) => {
+    const statement = original(...args);
+    frees.push(vi.spyOn(statement, 'free'));
+    return statement;
+  });
+  exporter.addCard('Front', 'Back');
+  expect(frees.length).toBeGreaterThan(0);
+  expect(frees.every((spy) => spy.mock.calls.length === 1)).toBe(true);
+  exporter.close();
+  exporter.close();
+  expect(() => exporter.addCard('Front', 'Back')).toThrow('closed');
+  expect(() => exporter.save()).toThrow('closed');
+});
+
+it('stores modification times in seconds', () => {
+  const exporter = create();
+  exporter.addCard('Front', 'Back');
+  const mod = exporter.db.exec('SELECT mod FROM notes')[0].values[0][0];
+  expect(Math.abs(mod - Math.floor(Date.now() / 1000))).toBeLessThanOrEqual(1);
 });

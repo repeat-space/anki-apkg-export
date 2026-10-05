@@ -4,7 +4,17 @@ import Zip from 'jszip';
 export default class {
   constructor(deckName, { template, sql }) {
     this.db = new sql.Database();
-    this.db.run(template);
+    try {
+      this.db.run(template.schema);
+      this.db.run(
+        'INSERT INTO col VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        template.values,
+      );
+    } catch (error) {
+      this.db.close();
+      throw error;
+    }
+    this.closed = false;
 
     const now = Date.now();
     const topDeckId = this._getId('cards', 'did', now);
@@ -34,6 +44,7 @@ export default class {
   }
 
   save(options) {
+    this._assertOpen();
     const { zip, db, media } = this;
     const binaryArray = db.export();
     const mediaObj = media.reduce((prev, curr, idx) => {
@@ -41,7 +52,7 @@ export default class {
       return prev;
     }, {});
 
-    zip.file('collection.anki2', new Buffer(binaryArray));
+    zip.file('collection.anki2', binaryArray);
     zip.file('media', JSON.stringify(mediaObj));
 
     media.forEach((item, i) => zip.file(i, item.data));
@@ -64,10 +75,12 @@ export default class {
   }
 
   addMedia(filename, data) {
+    this._assertOpen();
     this.media.push({ filename, data });
   }
 
   addCard(front, back, { tags } = {}) {
+    this._assertOpen();
     const { topDeckId, topModelId, separator } = this;
     const now = Date.now();
     const note_guid = this._getNoteGuid(topDeckId, front, back);
@@ -86,7 +99,7 @@ export default class {
         ':id': note_id, // integer primary key,
         ':guid': note_guid, // text not null,
         ':mid': topModelId, // integer not null,
-        ':mod': this._getId('notes', 'mod', now), // integer not null,
+        ':mod': Math.floor(now / 1000), // integer not null,
         ':usn': -1, // integer not null,
         ':tags': strTags, // text not null,
         ':flds': front + separator + back, // text not null,
@@ -104,7 +117,7 @@ export default class {
         ':nid': note_id, // integer not null,
         ':did': topDeckId, // integer not null,
         ':ord': 0, // integer not null,
-        ':mod': this._getId('cards', 'mod', now), // integer not null,
+        ':mod': Math.floor(now / 1000), // integer not null,
         ':usn': -1, // integer not null,
         ':type': 0, // integer not null,
         ':queue': 0, // integer not null,
@@ -122,8 +135,29 @@ export default class {
     );
   }
 
+  close() {
+    if (this.closed) return;
+    this.db.close();
+    this.media.length = 0;
+    this.zip = null;
+    this.closed = true;
+  }
+
+  _assertOpen() {
+    if (this.closed) throw new Error('Exporter is closed');
+  }
+
+  _query(query, values) {
+    const statement = this.db.prepare(query);
+    try {
+      return statement.getAsObject(values);
+    } finally {
+      statement.free();
+    }
+  }
+
   _update(query, obj) {
-    this.db.prepare(query).getAsObject(obj);
+    this.db.run(query, obj);
   }
 
   _getInitialRowValue(table, column = 'id') {
@@ -145,25 +179,25 @@ export default class {
 
   _getId(table, col, ts) {
     const query = `SELECT ${col} from ${table} WHERE ${col} >= :ts ORDER BY ${col} DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ':ts': ts });
+    const rowObj = this._query(query, { ':ts': ts });
 
     return rowObj[col] ? +rowObj[col] + 1 : ts;
   }
 
   _getNoteId(guid, ts) {
     const query = `SELECT id from notes WHERE guid = :guid ORDER BY id DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ':guid': guid });
+    const rowObj = this._query(query, { ':guid': guid });
 
     return rowObj.id || this._getId('notes', 'id', ts);
   }
 
   _getNoteGuid(topDeckId, front, back) {
-    return sha1(`${topDeckId}${front}${back}`);
+    return sha1(JSON.stringify([topDeckId, front, back]));
   }
 
   _getCardId(note_id, ts) {
     const query = `SELECT id from cards WHERE nid = :note_id ORDER BY id DESC LIMIT 1`;
-    const rowObj = this.db.prepare(query).getAsObject({ ':note_id': note_id });
+    const rowObj = this._query(query, { ':note_id': note_id });
 
     return rowObj.id || this._getId('cards', 'id', ts);
   }
