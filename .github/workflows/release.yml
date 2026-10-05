@@ -1,35 +1,43 @@
 name: Publish npm package
 on:
   push:
-    tags: ['v*']
+    branches: [master]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
   group: npm-release
   cancel-in-progress: false
 jobs:
-  verify:
+  plan:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     outputs:
+      publish: ${{ steps.release.outputs.publish }}
       version: ${{ steps.release.outputs.version }}
+      release-tag: ${{ steps.release.outputs.release-tag }}
       dist-tag: ${{ steps.release.outputs.dist-tag }}
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          fetch-depth: 0
-      - name: Require a commit on master
-        run: git merge-base --is-ancestor HEAD origin/master
+          node-version: 24
+          package-manager-cache: false
+      - name: Check whether the version is already published
+        id: release
+        run: node scripts/check-release.mjs
+  verify:
+    needs: plan
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: npm install --global corepack@latest
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - name: Check release version
-        id: release
-        run: node scripts/check-release.mjs
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
       - run: pnpm check
       - run: pnpm test:package
       - run: pnpm exec playwright install --with-deps chromium firefox
@@ -45,7 +53,7 @@ jobs:
           path: .tmp/release/*.tgz
           if-no-files-found: error
   publish:
-    needs: verify
+    needs: [plan, verify]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -63,14 +71,15 @@ jobs:
       - name: Publish verified tarball
         run: npm publish package/*.tgz --access public --provenance --ignore-scripts --tag "$DIST_TAG"
         env:
-          DIST_TAG: ${{ needs.verify.outputs.dist-tag }}
+          DIST_TAG: ${{ needs.plan.outputs.dist-tag }}
       - name: Create GitHub release
         shell: bash
         run: |
-          args=("$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes)
+          args=("$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$RELEASE_SHA" --generate-notes)
           if [[ "$DIST_TAG" == next ]]; then args+=(--prerelease); fi
           gh release create "${args[@]}"
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
-          DIST_TAG: ${{ needs.verify.outputs.dist-tag }}
+          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_TAG: ${{ needs.plan.outputs.release-tag }}
+          DIST_TAG: ${{ needs.plan.outputs.dist-tag }}

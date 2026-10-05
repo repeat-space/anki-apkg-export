@@ -1,9 +1,12 @@
 # Releasing
 
-Releases start from a clean, up-to-date `master`. Release-it updates the package
-version, commits it, and pushes an annotated tag. GitHub Actions verifies the
-tag and runs the package, browser and Anki tests before publishing the tarball.
-It creates a GitHub release after npm publication succeeds.
+Every push to `master`, including a merged PR, checks the version in
+`package.json` against npm. If that version is already published, the workflow
+skips it. Otherwise it runs the package, browser and Anki tests, publishes the
+verified tarball, and creates a GitHub release and tag for the merged commit.
+
+Stable versions publish under `latest`; prereleases publish under `next`.
+Registry errors fail the check rather than triggering publication.
 
 ## One-time npm setup
 
@@ -15,24 +18,26 @@ publisher with these values:
 - Workflow filename: `release.yml`
 - Environment: leave empty
 
+Allow `npm publish`. The separate `npm dist-tag` permission is not required.
 No `NPM_TOKEN` or `NODE_AUTH_TOKEN` secret is needed. See
 [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
 
-## Commands
+## Preparing a release
+
+In the PR branch, prepare the next version:
 
 ```sh
-pnpm release 5.0.0 --dry-run
-pnpm release 5.0.0
+pnpm release patch --dry-run
+pnpm release patch
 ```
 
-For later releases, use `pnpm release patch`, `minor`, or an explicit version.
-Release-it prompts before committing, tagging and pushing. A dry run does not
-publish or push; it prints the planned release operations.
+Use `minor`, `major`, or an explicit version such as `5.1.0-beta.1` as needed.
+Release-it checks the package, updates the version and lockfile, and creates a
+local commit. It does not push, tag or publish. Push the branch and merge the
+PR to publish. No version bump is needed when the version in `package.json`
+has not been published yet.
 
-To publish a preview, use an explicit version such as `5.1.0-beta.1`. Versions
-with a prerelease suffix publish under `next`; stable versions use `latest`.
-The workflow accepts only tags matching the package version and commits
-reachable from `master`. Publishing happens once the tag is pushed.
-
-If npm publication succeeds but GitHub release creation fails, create the
-GitHub release manually for the existing tag; do not republish the npm version.
+To retry a failed publication, run **Publish npm package** manually on `master`
+from GitHub Actions. If npm publication succeeded but GitHub release creation
+failed, create the GitHub release manually for that commit: retries skip
+versions already present in npm.

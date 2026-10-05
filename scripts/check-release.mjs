@@ -1,11 +1,35 @@
 import { readFileSync, appendFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
-const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
-const tag = process.env.RELEASE_TAG;
-if (tag !== `v${version}`) {
-  throw new Error(`Release tag ${tag} does not match package version v${version}`);
+export async function getReleasePlan({ name, version }, request = fetch) {
+  const response = await request(
+    `https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+  );
+  let published;
+  if (response.status === 404) published = false;
+  else if (response.ok) {
+    const metadata = await response.json();
+    if (metadata.name !== name || metadata.version !== version) {
+      throw new Error('npm returned unexpected package metadata');
+    }
+    published = true;
+  } else throw new Error(`npm version check failed: HTTP ${response.status}`);
+  return {
+    version,
+    'release-tag': `v${version}`,
+    'dist-tag': version.includes('-') ? 'next' : 'latest',
+    publish: !published,
+  };
 }
-const distTag = version.includes('-') ? 'next' : 'latest';
-const output = `version=${version}\ndist-tag=${distTag}\n`;
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, output);
-else process.stdout.write(output);
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const plan = await getReleasePlan(JSON.parse(readFileSync('package.json', 'utf8')));
+  const output = Object.entries(plan)
+    .map(([key, value]) => `${key}=${value}\n`)
+    .join('');
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, output);
+  else process.stdout.write(output);
+  console.log(
+    plan.publish ? `Publish ${plan.version}` : `${plan.version} is already published; skip`,
+  );
+}
