@@ -285,10 +285,32 @@ export class Exporter {
       if (!parts.includes('cloze')) continue;
       const fieldIndex = model.flds.findIndex((field) => field.name === parts.at(-1));
       if (fieldIndex < 0) throw new TypeError('Cloze template refers to an unknown field');
-      for (const match of fields[fieldIndex]!.matchAll(/{{c([1-9]\d*)::([^]*?)}}/g)) {
+      const text = fields[fieldIndex]!;
+      for (const match of text.matchAll(/{{c([1-9]\d*)::/g)) {
+        const start = match.index + match[0].length;
+        let depth = 1;
+        let cursor = start;
+        for (; cursor < text.length && depth; cursor++) {
+          const pair = text.slice(cursor, cursor + 2);
+          if (pair === '{{') {
+            depth++;
+            cursor++;
+          } else if (pair === '}}') {
+            depth--;
+            cursor++;
+          }
+        }
+        if (
+          depth ||
+          !text
+            .slice(start, cursor - 2)
+            .split('::')[0]
+            ?.trim()
+        )
+          continue;
         const number = Number(match[1]);
         if (number > 500) throw new TypeError('Cloze numbers must be between 1 and 500');
-        if (match[2]) ords.add(number - 1);
+        ords.add(number - 1);
       }
     }
     return [...ords].sort((a, b) => a - b);
@@ -308,7 +330,7 @@ export class Exporter {
     this.media.set(filename, data);
   }
 
-  save(): Promise<Uint8Array>;
+  save(options?: JSZip.JSZipGeneratorOptions<'uint8array'>): Promise<Uint8Array>;
   save<T extends JSZip.OutputType>(
     options: JSZip.JSZipGeneratorOptions<T> & { type: T },
   ): Promise<SaveOutput[T]>;
@@ -335,7 +357,11 @@ export class Exporter {
       zip.file(key, data);
     }
     zip.file('media', JSON.stringify(manifest));
-    return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', ...options });
+    return zip.generateAsync({
+      ...options,
+      type: options.type ?? 'uint8array',
+      compression: options.compression ?? 'DEFLATE',
+    });
   }
 
   close(): void {

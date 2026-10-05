@@ -21,7 +21,7 @@ try {
         tags: ['city'],
         deck: 'Languages::Japanese::Cities',
       });
-      apkg.addCloze('The capital of {{c1::Japan}} is {{c3::Tokyo}}', 'Geography', {
+      apkg.addCloze('The capital of {{c1::{{c3::Japan}}}} is Tokyo', 'Geography', {
         noteId: 'capital',
         deck: 'Languages::Japanese',
       });
