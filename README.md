@@ -34,6 +34,8 @@ For CommonJS: `const { AnkiExport } = require('anki-apkg-export')`.
 
 ## Browser
 
+[Try the browser demo](https://repeat-space.github.io/anki-apkg-export/).
+
 With Vite, import the bundled WASM asset and request a Blob:
 
 ```js
