@@ -1,4 +1,11 @@
 {
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": { "name": "conventionalcommits" },
+      "tagPrefix": "v",
+      "infile": false
+    }
+  },
   "git": {
     "requireBranch": false,
     "requireCleanWorkingDir": true,
