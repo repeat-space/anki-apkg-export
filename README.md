@@ -102,6 +102,8 @@ pnpm demo
 `pnpm test:anki` uses [uv](https://docs.astral.sh/uv/) to check imports with Anki 26.09.3.
 `pnpm benchmark 10000` reports batch insertion, export time and RSS change.
 
+See [Releasing](docs/releasing.md) for versioning and npm publication.
+
 Exports use the legacy `collection.anki2` package format. Import, media and
 re-import behavior are tested against Anki 26.09.3; other clients are not yet
 covered by the integration test.
