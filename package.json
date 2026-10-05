@@ -4,8 +4,10 @@
   "description": "Generate decks for Anki (spaced repetition software)",
   "keywords": [
     "anki",
-    "spaced repetition software",
-    "webpack"
+    "apkg",
+    "cloze",
+    "flashcards",
+    "spaced repetition"
   ],
   "license": "MIT",
   "author": "ewnd9 <ewndnine@gmail.com>",
@@ -14,7 +16,9 @@
     "url": "git+https://github.com/repeat-space/anki-apkg-export.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs/api.md",
+    "docs/migration-v5.md"
   ],
   "type": "module",
   "sideEffects": false,

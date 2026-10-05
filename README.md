@@ -1,125 +1,111 @@
 # anki-apkg-export
 
-[![Build Status](https://travis-ci.org/repeat-space/anki-apkg-export.svg?branch=master)](https://travis-ci.org/repeat-space/anki-apkg-export)
+[![CI](https://github.com/repeat-space/anki-apkg-export/actions/workflows/ci.yml/badge.svg)](https://github.com/repeat-space/anki-apkg-export/actions/workflows/ci.yml)
 
-Universal module for generating decks for Anki.
-
-Port of the Ruby gem https://github.com/albertzak/anki2
+Generate Anki `.apkg` decks in Node.js or a browser.
+Supports front/back, reversed and cloze cards, custom note types, tags and media.
 
 ## Install
 
-```
-$ npm install anki-apkg-export --save
+```sh
+npm install anki-apkg-export
 ```
 
-## Usage
+Node.js 22.12 or newer. TypeScript declarations are included.
+For v4 users, see [Migrating to v5](docs/migration-v5.md).
 
-### server
+## Node.js
 
 ```js
-const fs = require('fs');
-const AnkiExport = require('anki-apkg-export').default;
-
-const apkg = new AnkiExport('deck-name');
-
-apkg.addMedia('anki.png', fs.readFileSync('anki.png'));
-
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
-
-apkg
-  .save()
-  .then(zip => {
-    fs.writeFileSync('./output.apkg', zip, 'binary');
-    console.log(`Package has been generated: output.pkg`);
-  })
-  .catch(err => console.log(err.stack || err));
-```
-
-### browser
-
-Intended to be used with [`webpack`](https://github.com/webpack/webpack)
-
-```js
-const webpack = require('webpack');
-
-module.exports = {
-  entry: './index.js',
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'babel'
-      },
-    ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
-      },
-    })
-  ],
-  output: {
-    path: __dirname,
-    filename: 'bundle.js'
-  }
-};
-```
-
-Required loaders:
-
-- [`script-loader`](https://github.com/webpack/script-loader)
-
-```js
-import { saveAs } from 'file-saver';
+import { writeFile } from 'node:fs/promises';
 import AnkiExport from 'anki-apkg-export';
 
-const apkg = new AnkiExport('deck-name');
-
-// could be a File from <input /> or a Blob from fetch
-// take a look at the example folder for a complete overview
-apkg.addMedia('anki.png', file);
-
-apkg.addCard('card #1 front', 'card #1 back');
-apkg.addCard('card #2 front', 'card #2 back', { tags: ['nice', 'better card'] });
-apkg.addCard('card #3 with image <img src="anki.png" />', 'card #3 back');
-
-apkg
-  .save()
-  .then(zip => {
-    saveAs(zip, 'output.apkg');
-  })
-  .catch(err => console.log(err.stack || err));
+const apkg = await AnkiExport.create('Japanese');
+try {
+  apkg.addCard('東京', 'Tokyo', { noteId: 'tokyo', tags: ['city'] });
+  apkg.addCard('日本', 'Japan', { noteId: 'japan' });
+  await writeFile('japanese.apkg', await apkg.save());
+} finally {
+  apkg.close();
+}
 ```
 
-## Examples
+For CommonJS: `const { AnkiExport } = require('anki-apkg-export')`.
 
-- [server from above](examples/server)
-- [browser from above](examples/browser)
-- [browser usage with media attachments via ajax](examples/browser-media-ajax)
-- [browser usage with media attachments via <form />](examples/browser-media-file-input)
+## Browser
 
-## Changelog
+With Vite, import the bundled WASM asset and request a Blob:
 
-- `v4.0.0` - expose template variables (frontside, backside and css)
-- `v3.1.0` - make setting APP_ENV optional
-- `v3.0.0` - add tags, ES6 refactor (breaking)
-- `v2.0.0` - add media support, update jszip dependency (breaking)
-- `v1.0.0` - initial rewrite
+```js
+import AnkiExport from 'anki-apkg-export';
+import wasmUrl from 'anki-apkg-export/sql-wasm.wasm?url';
 
-## Tips
+const apkg = await AnkiExport.create('Japanese', {
+  locateFile: () => wasmUrl,
+});
+try {
+  apkg.addCard('東京', 'Tokyo');
+  const blob = await apkg.save({ type: 'blob' });
+  // Download with an <a download> link and URL.createObjectURL(blob).
+} finally {
+  apkg.close();
+}
+```
 
-- [issue#25](https://github.com/ewnd9/anki-apkg-export/issues/25) - Dealing with `sql.js` memory limits
+Other bundlers can serve `sql-wasm.wasm` as a static asset and return its URL from
+`locateFile`. No webpack loaders or Node polyfills are needed.
+See the [browser example](examples/browser) for downloads and file attachments.
 
-## Related
+## Card types
 
-- [apkg format documentation](http://decks.wikia.com/wiki/Anki_APKG_format_documentation)
-- [anki-apkg-export-cli](https://github.com/ewnd9/anki-apkg-export-cli) - CLI for this module
-- [anki-apkg-export-app](https://github.com/ewnd9/anki-apkg-export-app) - Simple web app to generate cards online
+```js
+const reversed = await AnkiExport.create('Vocabulary', { kind: 'reversed' });
+reversed.addCard('東京', 'Tokyo'); // two cards
+reversed.close();
+
+const cloze = await AnkiExport.create('Geography', { kind: 'cloze' });
+cloze.addCloze('The capital of {{c1::Japan}} is {{c2::Tokyo}}'); // two cards
+cloze.close();
+```
+
+`addCloze()` also works on a basic deck; it adds a cloze note type to the package.
+Use [custom models](docs/api.md#custom-models) for more fields or templates.
+
+## Media, batches and subdecks
+
+```js
+apkg.addMedia('photo.png', imageBytes); // Buffer, Uint8Array, Blob or File
+apkg.addCard('<img src="photo.png">', 'Tokyo');
+apkg.addCard('Listen', '[sound:audio.mp3]'); // add audio.mp3 with addMedia()
+
+apkg.addCards([
+  { front: '東京', back: 'Tokyo', noteId: 'tokyo', deck: 'Japanese::Cities' },
+  { front: '京都', back: 'Kyoto', noteId: 'kyoto', deck: 'Japanese::Cities' },
+]);
+```
+
+Batches are transactional. Keep `noteId` unchanged when editing a note so a
+later export can update it on import. Deck and model IDs are stable by default;
+set them explicitly if their names will change.
+
+## Development
+
+```sh
+corepack enable
+pnpm install
+pnpm check
+pnpm demo
+```
+
+`pnpm test:package` checks the packed npm module in a clean project.
+`pnpm test:browser` runs Playwright after `pnpm demo:build`.
+`pnpm test:anki` uses [uv](https://docs.astral.sh/uv/) to check imports with Anki 26.09.3.
+`pnpm benchmark 10000` reports batch insertion, export time and RSS change.
+
+Exports use the legacy `collection.anki2` package format. Import, media and
+re-import behavior are tested against Anki 26.09.3; other clients are not yet
+covered by the integration test.
 
 ## License
 
-MIT © [ewnd9](http://ewnd9.com)
+MIT © ewnd9. Originally ported from [anki2](https://github.com/albertzak/anki2).
