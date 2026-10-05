@@ -19,10 +19,15 @@ jobs:
       dist-tag: ${{ steps.release.outputs.dist-tag }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           package-manager-cache: false
+      - run: npm install --global corepack@latest
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
       - name: Check whether the version is already published
         id: release
         run: node scripts/check-release.mjs
@@ -38,6 +43,12 @@ jobs:
       - run: npm install --global corepack@latest
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - name: Set the computed package version
+        run: |
+          npm version "$RELEASE_VERSION" --no-git-tag-version --allow-same-version --ignore-scripts
+          pnpm install --lockfile-only --ignore-scripts
+        env:
+          RELEASE_VERSION: ${{ needs.plan.outputs.version }}
       - run: pnpm check
       - run: pnpm test:package
       - run: pnpm exec playwright install --with-deps chromium firefox
@@ -52,6 +63,13 @@ jobs:
           name: npm-package
           path: .tmp/release/*.tgz
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata
+          path: |
+            package.json
+            pnpm-lock.yaml
+          if-no-files-found: error
   publish:
     needs: [plan, verify]
     runs-on: ubuntu-latest
@@ -59,11 +77,33 @@ jobs:
       contents: write
       id-token: write
     steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           package-manager-cache: false
       - run: npm install --global npm@latest
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-metadata
+      - name: Record the verified version on master
+        id: version-commit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git diff --quiet -- package.json pnpm-lock.yaml; then
+            git add package.json pnpm-lock.yaml
+            git commit -m "chore: release $RELEASE_TAG"
+            git push origin HEAD:master
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_TAG: ${{ needs.plan.outputs.release-tag }}
       - uses: actions/download-artifact@v4
         with:
           name: npm-package
@@ -80,6 +120,6 @@ jobs:
           gh release create "${args[@]}"
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_SHA: ${{ steps.version-commit.outputs.sha }}
           RELEASE_TAG: ${{ needs.plan.outputs.release-tag }}
           DIST_TAG: ${{ needs.plan.outputs.dist-tag }}
