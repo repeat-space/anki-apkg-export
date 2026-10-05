@@ -21,7 +21,7 @@ export default function createTemplate({
 
   const models = {
     1388596687391: {
-      veArs: [],
+      vers: [],
       name: 'Basic-f15d2',
       tags: ['Tag'],
       did: 1435588830424,
@@ -142,7 +142,8 @@ export default function createTemplate({
     },
   };
 
-  return `
+  return {
+    schema: `
     PRAGMA foreign_keys=OFF;
     BEGIN TRANSACTION;
     CREATE TABLE col (
@@ -159,21 +160,6 @@ export default function createTemplate({
         decks           text not null,
         dconf           text not null,
         tags            text not null
-    );
-    INSERT INTO "col" VALUES(
-      1,
-      1388548800,
-      1435645724219,
-      1435645724215,
-      11,
-      0,
-      0,
-      0,
-      '${JSON.stringify(conf)}',
-      '${JSON.stringify(models)}',
-      '${JSON.stringify(decks)}',
-      '${JSON.stringify(dconf)}',
-      '{}'
     );
     CREATE TABLE notes (
         id              integer primary key,   /* 0 */
@@ -224,15 +210,30 @@ export default function createTemplate({
         oid             integer not null,
         type            integer not null
     );
-    ANALYZE sqlite_master;
-    INSERT INTO "sqlite_stat1" VALUES('col',NULL,'1');
     CREATE INDEX ix_notes_usn on notes (usn);
     CREATE INDEX ix_cards_usn on cards (usn);
     CREATE INDEX ix_revlog_usn on revlog (usn);
     CREATE INDEX ix_cards_nid on cards (nid);
     CREATE INDEX ix_cards_sched on cards (did, queue, due);
     CREATE INDEX ix_revlog_cid on revlog (cid);
+    CREATE INDEX ix_notes_guid on notes (guid);
     CREATE INDEX ix_notes_csum on notes (csum);
     COMMIT;
-  `;
+    `,
+    values: [
+      1,
+      Math.floor(Date.now() / 1000),
+      Date.now(),
+      Date.now(),
+      11,
+      0,
+      0,
+      0,
+      JSON.stringify(conf),
+      JSON.stringify(models),
+      JSON.stringify(decks),
+      JSON.stringify(dconf),
+      '{}',
+    ],
+  };
 }
