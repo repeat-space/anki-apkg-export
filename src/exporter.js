@@ -55,10 +55,10 @@ export default class {
           {
             type: 'nodebuffer',
             base64: false,
-            compression: 'DEFLATE'
+            compression: 'DEFLATE',
           },
-          options
-        )
+          options,
+        ),
       );
     }
   }
@@ -80,19 +80,22 @@ export default class {
       strTags = this._tagsToStr(tags);
     }
 
-    this._update('insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)', {
-      ':id': note_id, // integer primary key,
-      ':guid': note_guid, // text not null,
-      ':mid': topModelId, // integer not null,
-      ':mod': this._getId('notes', 'mod', now), // integer not null,
-      ':usn': -1, // integer not null,
-      ':tags': strTags, // text not null,
-      ':flds': front + separator + back, // text not null,
-      ':sfld': front, // integer not null,
-      ':csum': this._checksum(front + separator + back), //integer not null,
-      ':flags': 0, // integer not null,
-      ':data': '' // text not null,
-    });
+    this._update(
+      'insert or replace into notes values(:id,:guid,:mid,:mod,:usn,:tags,:flds,:sfld,:csum,:flags,:data)',
+      {
+        ':id': note_id, // integer primary key,
+        ':guid': note_guid, // text not null,
+        ':mid': topModelId, // integer not null,
+        ':mod': this._getId('notes', 'mod', now), // integer not null,
+        ':usn': -1, // integer not null,
+        ':tags': strTags, // text not null,
+        ':flds': front + separator + back, // text not null,
+        ':sfld': front, // integer not null,
+        ':csum': this._checksum(front + separator + back), //integer not null,
+        ':flags': 0, // integer not null,
+        ':data': '', // text not null,
+      },
+    );
 
     return this._update(
       'insert or replace into cards values(:id,:nid,:did,:ord,:mod,:usn,:type,:queue,:due,:ivl,:factor,:reps,:lapses,:left,:odue,:odid,:flags,:data)',
@@ -114,8 +117,8 @@ export default class {
         ':odue': 0, // integer not null,
         ':odid': 0, // integer not null,
         ':flags': 0, // integer not null,
-        ':data': '' // text not null
-      }
+        ':data': '', // text not null
+      },
     );
   }
 
@@ -137,7 +140,7 @@ export default class {
   }
 
   _tagsToStr(tags = []) {
-    return ' ' + tags.map(tag => tag.replace(/ /g, '_')).join(' ') + ' ';
+    return ' ' + tags.map((tag) => tag.replace(/ /g, '_')).join(' ') + ' ';
   }
 
   _getId(table, col, ts) {
@@ -166,7 +169,7 @@ export default class {
   }
 }
 
-export const getLastItem = obj => {
+export const getLastItem = (obj) => {
   const keys = Object.keys(obj);
   const lastKey = keys[keys.length - 1];
 
