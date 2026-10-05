@@ -1,7 +1,7 @@
 name: Publish npm package
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       publish: ${{ steps.release.outputs.publish }}
@@ -79,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: master
+          ref: main
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -88,7 +88,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: release-metadata
-      - name: Record the verified version on master
+      - name: Record the verified version on main
         id: version-commit
         shell: bash
         run: |
@@ -98,7 +98,7 @@ jobs:
           if ! git diff --quiet -- package.json pnpm-lock.yaml; then
             git add package.json pnpm-lock.yaml
             git commit -m "chore: release $RELEASE_TAG"
-            git push origin HEAD:master
+            git push origin HEAD:main
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
         env:
