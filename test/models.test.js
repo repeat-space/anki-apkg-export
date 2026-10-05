@@ -48,6 +48,14 @@ it('adds basic and cloze notes to the same package', async () => {
   ).toEqual([0, 1]);
 });
 
+it('generates inner cloze cards and rejects empty or unclosed deletions', async () => {
+  const exporter = await create({ kind: 'cloze' });
+  exporter.addCloze('The capital of {{c1::{{c3::Japan}}}} is Tokyo');
+  expect(exporter.db.exec('SELECT ord FROM cards ORDER BY ord')[0].values).toEqual([[0], [2]]);
+  expect(() => exporter.addCloze('{{c1::}}')).toThrow('does not generate');
+  expect(() => exporter.addCloze('{{c1::missing closing braces')).toThrow('does not generate');
+});
+
 it('exports custom fields, templates, sort field and nested decks', async () => {
   const exporter = await create();
   const modelId = exporter.addModel({
