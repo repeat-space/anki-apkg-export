@@ -53,7 +53,7 @@
     "demo:build": "pnpm --filter @anki-apkg-export/browser-example build",
     "test:browser": "playwright test",
     "test:anki": "node scripts/anki-fixtures.mjs && uv run --with anki==26.09.3 python test/anki_import.py",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build && pnpm demo:build",
+    "check": "pnpm lint && pnpm format:check && pnpm build && pnpm typecheck && pnpm test && pnpm demo:build",
     "test:package": "node scripts/package-smoke.mjs"
   },
   "dependencies": {
