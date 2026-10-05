@@ -1,0 +1,12 @@
+{
+  "singleQuote": true,
+  "printWidth": 100,
+  "ignorePatterns": [
+    "README.md",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "dist/**",
+    "examples/**",
+    "templates/**"
+  ]
+}
