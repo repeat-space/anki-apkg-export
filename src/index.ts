@@ -31,4 +31,8 @@ export type {
   CardInput,
   MediaData,
   SaveOutput,
+  ModelDefinition,
+  CardTemplate,
+  NoteFields,
+  NoteInput,
 } from './types.js';

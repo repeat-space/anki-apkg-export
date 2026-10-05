@@ -1,4 +1,4 @@
-import type { TemplateOptions } from './types.js';
+import type { ExportOptions, ModelDefinition } from './types.js';
 
 export const defaultCss: string =
   '.card { font-family: sans-serif; font-size: 20px; text-align: center; }\n';
@@ -73,23 +73,112 @@ export function createDeck(name: string, id: number): AnkiDeck {
   };
 }
 
+export function defaultModel(deckName: string, options: ExportOptions): ModelDefinition {
+  const kind = options.kind ?? 'basic';
+  if (!['basic', 'reversed', 'cloze'].includes(kind)) throw new TypeError('Unknown model kind');
+  if (options.model) return options.model;
+  if (kind === 'cloze')
+    return {
+      name: `${deckName} — Cloze`,
+      type: 'cloze',
+      fields: ['Text', 'Extra'],
+      css: options.css,
+      templates: [
+        {
+          name: 'Cloze',
+          questionFormat: options.questionFormat ?? '{{cloze:Text}}',
+          answerFormat: options.answerFormat ?? '{{cloze:Text}}<br>{{Extra}}',
+        },
+      ],
+    };
+  const templates = [
+    {
+      name: 'Forward',
+      questionFormat: options.questionFormat ?? '{{Front}}',
+      answerFormat: options.answerFormat ?? '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
+      requiredFields: ['Front'],
+    },
+  ];
+  if (kind === 'reversed')
+    templates.push({
+      name: 'Reverse',
+      questionFormat: '{{Back}}',
+      answerFormat: '{{FrontSide}}<hr id="answer">{{Front}}',
+      requiredFields: ['Back'],
+    });
+  return {
+    name: `${deckName} — ${kind === 'reversed' ? 'Reversed' : 'Basic'}`,
+    fields: ['Front', 'Back'],
+    templates,
+    css: options.css,
+  };
+}
+
 export function createModel(
-  deckName: string,
   deckId: number,
   modelId: number,
-  options: TemplateOptions,
+  definition: ModelDefinition,
 ): AnkiModel {
+  const { name, fields, templates } = definition;
+  if (typeof name !== 'string' || !name.trim()) throw new TypeError('Model name must not be empty');
+  if (
+    !Array.isArray(fields) ||
+    !fields.length ||
+    new Set(fields).size !== fields.length ||
+    fields.some(
+      (field) => typeof field !== 'string' || !field.trim() || /[{}:\u0000\u001f]/u.test(field),
+    )
+  ) {
+    throw new TypeError(
+      'Model fields must have unique, nonempty names without template delimiters',
+    );
+  }
+  if (definition.type !== undefined && !['basic', 'cloze'].includes(definition.type))
+    throw new TypeError('Unknown model type');
+  if (
+    !Array.isArray(templates) ||
+    !templates.length ||
+    new Set(templates.map((template) => template.name)).size !== templates.length
+  ) {
+    throw new TypeError('A model needs templates with unique names');
+  }
+  if (definition.type === 'cloze' && templates.length !== 1)
+    throw new TypeError('A cloze model needs exactly one template');
+  for (const template of templates) {
+    if (
+      typeof template.name !== 'string' ||
+      !template.name.trim() ||
+      typeof template.questionFormat !== 'string' ||
+      !template.questionFormat.trim() ||
+      typeof template.answerFormat !== 'string'
+    ) {
+      throw new TypeError('Each template needs a name, questionFormat and answerFormat');
+    }
+  }
+  const sortf = definition.sortField === undefined ? 0 : fields.indexOf(definition.sortField);
+  if (sortf < 0) throw new TypeError('Unknown sortField');
+  const req: AnkiModel['req'] = templates.map((template, ord) => {
+    const required = template.requiredFields ?? [fields[0]!];
+    if (
+      !Array.isArray(required) ||
+      !required.length ||
+      required.some((field) => !fields.includes(field))
+    ) {
+      throw new TypeError('requiredFields must name existing model fields');
+    }
+    return [ord, 'all', required.map((field) => fields.indexOf(field))];
+  });
   return {
     id: modelId,
-    name: `${deckName} — Basic`,
-    type: 0,
+    name,
+    type: definition.type === 'cloze' ? 1 : 0,
     mod: Math.floor(Date.now() / 1000),
     usn: -1,
     did: deckId,
-    sortf: 0,
+    sortf,
     tags: [],
     vers: [],
-    flds: ['Front', 'Back'].map((name, ord) => ({
+    flds: fields.map((name, ord) => ({
       name,
       ord,
       sticky: false,
@@ -98,19 +187,17 @@ export function createModel(
       size: 20,
       media: [],
     })),
-    tmpls: [
-      {
-        name: 'Card 1',
-        ord: 0,
-        qfmt: options.questionFormat ?? '{{Front}}',
-        afmt: options.answerFormat ?? '{{FrontSide}}\n\n<hr id="answer">\n\n{{Back}}',
-        bqfmt: '',
-        bafmt: '',
-        did: null,
-      },
-    ],
-    req: [[0, 'all', [0]]],
-    css: options.css ?? defaultCss,
+    tmpls: templates.map((template, ord) => ({
+      name: template.name,
+      ord,
+      qfmt: template.questionFormat,
+      afmt: template.answerFormat,
+      bqfmt: '',
+      bafmt: '',
+      did: null,
+    })),
+    req,
+    css: definition.css ?? defaultCss,
     latexPre:
       '\\documentclass[12pt]{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\begin{document}',
     latexPost: '\\end{document}',
