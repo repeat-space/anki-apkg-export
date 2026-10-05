@@ -1,3 +1,4 @@
 {
-  "categories": { "correctness": "error" }
+  "categories": { "correctness": "error" },
+  "rules": { "no-control-regex": "off" }
 }

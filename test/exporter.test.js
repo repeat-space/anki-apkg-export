@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import SQL from 'sql.js';
+import initSqlJs from 'sql.js';
+const SQL = await initSqlJs();
 import JSZip from 'jszip';
-import Exporter from '../src/exporter';
-import createTemplate from '../src/template';
+import AnkiExport, { Exporter } from '../src/index';
 
 const exporters = [];
 function create(templateOptions) {
   const exporter = new Exporter('Test deck', {
     sql: SQL,
-    template: createTemplate(templateOptions),
+    ...templateOptions,
   });
   exporters.push(exporter);
   return exporter;
@@ -96,4 +96,49 @@ it('stores modification times in seconds', () => {
   exporter.addCard('Front', 'Back');
   const mod = exporter.db.exec('SELECT mod FROM notes')[0].values[0][0];
   expect(Math.abs(mod - Math.floor(Date.now() / 1000))).toBeLessThanOrEqual(1);
+});
+
+it('initializes WASM asynchronously and exports typed output', async () => {
+  const exporter = await AnkiExport.create('Async deck');
+  exporters.push(exporter);
+  exporter.addCard('Front', 'Back');
+  expect(await exporter.save()).toBeInstanceOf(Uint8Array);
+  expect(await exporter.save({ type: 'nodebuffer' })).toBeInstanceOf(Buffer);
+});
+
+it('keeps deck, model and note identities stable when a keyed note changes', async () => {
+  const first = create();
+  const second = create();
+  first.addCard('Front', 'Old answer', { noteId: 'word-1' });
+  second.addCard('Front edited', 'New answer', { noteId: 'word-1' });
+  expect(second.topDeckId).toBe(first.topDeckId);
+  expect(second.topModelId).toBe(first.topModelId);
+  expect(second.db.exec('SELECT guid FROM notes')).toEqual(first.db.exec('SELECT guid FROM notes'));
+  second.addCard('Front edited', 'Third answer', { noteId: 'word-1' });
+  expect(second.db.exec('SELECT count(*) FROM notes')[0].values).toEqual([[1]]);
+  expect(second.db.exec('SELECT count(*) FROM cards')[0].values).toEqual([[1]]);
+});
+
+it('rolls back a batch when any card is invalid', () => {
+  const exporter = create();
+  expect(() =>
+    exporter.addCards([
+      { front: 'Valid', back: 'Back' },
+      { front: '', back: 'Back' },
+    ]),
+  ).toThrow('empty');
+  expect(exporter.db.exec('SELECT count(*) FROM notes')[0].values).toEqual([[0]]);
+  exporter.addCards([
+    { front: 'One', back: '1' },
+    { front: 'Two', back: '2' },
+  ]);
+  expect(exporter.db.exec('SELECT due FROM cards ORDER BY id')[0].values).toEqual([[1], [2]]);
+});
+
+it('rejects duplicate media filenames and malformed fields', () => {
+  const exporter = create();
+  exporter.addMedia('image.png', new Uint8Array());
+  expect(() => exporter.addMedia('image.png', new Uint8Array())).toThrow('already added');
+  expect(() => exporter.addMedia('../image.png', new Uint8Array())).toThrow('filename');
+  expect(() => exporter.addCard('a\u001fb', 'c')).toThrow('separator');
 });
