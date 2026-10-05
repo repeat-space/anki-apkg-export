@@ -1,10 +1,10 @@
 {
   "git": {
-    "requireBranch": "master",
+    "requireBranch": false,
     "requireCleanWorkingDir": true,
     "commitMessage": "chore: release v${version}",
-    "tagName": "v${version}",
-    "pushRepo": "origin"
+    "tag": false,
+    "push": false
   },
   "npm": {
     "publish": false,
