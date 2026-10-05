@@ -109,7 +109,7 @@ jobs:
           name: npm-package
           path: package
       - name: Publish verified tarball
-        run: npm publish package/*.tgz --access public --provenance --ignore-scripts --tag "$DIST_TAG"
+        run: npm publish ./package/*.tgz --access public --provenance --ignore-scripts --tag "$DIST_TAG"
         env:
           DIST_TAG: ${{ needs.plan.outputs.dist-tag }}
       - name: Create GitHub release
