@@ -1,0 +1,246 @@
+:root {
+  color: #272e25;
+  background: #f3f1e9;
+  font-family: 'Avenir Next', Avenir, sans-serif;
+  font-size: 16px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  width: min(900px, calc(100% - 48px));
+  margin: 48px auto 32px;
+}
+header {
+  padding-bottom: 32px;
+  border-bottom: 1px solid #d4d6ca;
+}
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.wordmark {
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+.wordmark span {
+  margin-left: 8px;
+  border: 1px solid #c2c8b9;
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-weight: 400;
+}
+h1 {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+  font-size: clamp(44px, 7vw, 68px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  margin: 32px 0 18px;
+}
+header p,
+.media p,
+#status {
+  color: #64695e;
+  line-height: 1.5;
+}
+header p {
+  margin: 0;
+}
+form {
+  margin-top: 28px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-weight: 400;
+  color: #272e25;
+  background: #fffefa;
+  border: 1px solid #cbd0c1;
+  border-radius: 4px;
+  padding: 11px 12px;
+  margin-top: 8px;
+}
+textarea {
+  resize: vertical;
+  line-height: 1.55;
+  min-height: 110px;
+  font-size: 16px;
+}
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #657e4c;
+  outline-offset: 3px;
+}
+.settings {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 24px;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 32px 0 16px;
+}
+h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+h2 span {
+  margin-left: 8px;
+  color: #6c7463;
+  font-weight: 400;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.secondary {
+  border: 1px solid #b8c2ab;
+  color: #3f5230;
+  padding: 8px 12px;
+  background: transparent;
+  font-size: 13px;
+}
+.card-row {
+  background: #e8ebdf;
+  padding: 20px 24px;
+  border: 1px solid #cdd3c3;
+  border-left: 3px solid #667e4e;
+  margin-bottom: 16px;
+  border-radius: 3px;
+}
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.card-number {
+  font-family: monospace;
+  font-size: 12px;
+  color: #667359;
+}
+.remove {
+  color: #636b5a;
+  border: 0;
+  background: transparent;
+  padding: 4px 0 4px 12px;
+  font-size: 12px;
+}
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.tags-label {
+  margin-top: 16px;
+}
+.tags-label input {
+  font-size: 13px;
+  padding: 8px 12px;
+}
+.media {
+  margin: 24px 0;
+}
+.media p {
+  font-size: 13px;
+  margin: 6px 0 10px;
+}
+input[type='file'] {
+  width: auto;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+}
+input[type='file']::file-selector-button {
+  background: #fffefa;
+  border: 1px solid #b8c2ab;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-right: 12px;
+  color: #3f5230;
+  cursor: pointer;
+}
+#media-list {
+  font-size: 13px;
+  padding-left: 18px;
+}
+.export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #d4d6ca;
+  padding-top: 24px;
+}
+#status {
+  font-size: 13px;
+  margin: 0;
+}
+#download {
+  white-space: nowrap;
+  background: #3f5631;
+  color: #fffefa;
+  padding: 14px 20px;
+  border: 1px solid #3f5631;
+  font-size: 14px;
+}
+#download:hover {
+  background: #2e4423;
+}
+#download span {
+  margin-left: 20px;
+}
+footer {
+  font-size: 12px;
+  color: #777e6d;
+  margin-top: 40px;
+}
+#cloze-help {
+  font-size: 13px;
+  color: #64695e;
+}
+@media (max-width: 600px) {
+  main {
+    width: calc(100% - 32px);
+    margin-top: 24px;
+  }
+  .settings,
+  .fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .card-row {
+    padding: 16px;
+  }
+  .export-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

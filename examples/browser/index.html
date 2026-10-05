@@ -1,1 +1,71 @@
-<script src="/bundle.js"></script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anki deck builder</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a class="wordmark" href="https://github.com/repeat-space/anki-apkg-export"
+          >anki-apkg-export <span>v5</span></a
+        >
+        <h1>A few cards.<br />A new deck.</h1>
+        <p>Write your cards, attach media, and open the downloaded deck in Anki.</p>
+      </header>
+      <form id="deck-form">
+        <section class="settings" aria-label="Deck settings">
+          <label>Deck name<input id="deck-name" value="Japanese essentials" required /></label>
+          <label
+            >Card type<select id="kind">
+              <option value="basic">Front / back</option>
+              <option value="reversed">Both directions</option>
+              <option value="cloze">Cloze deletion</option>
+            </select></label
+          >
+        </section>
+        <div class="section-heading">
+          <h2>Cards <span id="count">1</span></h2>
+          <button class="secondary" type="button" id="add-card">+ Add card</button>
+        </div>
+        <p id="cloze-help" hidden>Use {{c1::hidden text}}. Each cloze number creates a card.</p>
+        <div id="cards"></div>
+        <section class="media" aria-label="Media attachments">
+          <label for="media-files">Images &amp; audio</label>
+          <p>Attachments are inserted into the last field you edited.</p>
+          <input type="file" id="media-files" accept="image/*,audio/*" multiple />
+          <ul id="media-list"></ul>
+        </section>
+        <div class="export-bar">
+          <p id="status" role="status" aria-live="polite">Everything stays in your browser.</p>
+          <button id="download" type="submit">
+            Download .apkg <span aria-hidden="true">↓</span>
+          </button>
+        </div>
+      </form>
+      <footer>
+        Made with <a href="https://github.com/repeat-space/anki-apkg-export">anki-apkg-export</a>
+      </footer>
+    </main>
+    <template id="card-template">
+      <article class="card-row">
+        <div class="card-heading">
+          <span class="card-number"></span><button class="remove" type="button">Remove</button>
+        </div>
+        <div class="fields">
+          <label
+            ><span class="front-label">Front</span
+            ><textarea class="front" rows="3" required></textarea></label
+          ><label
+            ><span class="back-label">Back</span><textarea class="back" rows="3"></textarea>
+          </label>
+        </div>
+        <label class="tags-label"
+          >Tags<input class="tags" placeholder="e.g. Japanese geography"
+        /></label>
+      </article>
+    </template>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
